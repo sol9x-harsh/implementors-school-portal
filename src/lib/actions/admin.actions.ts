@@ -91,38 +91,27 @@ export async function createEvent(formData: FormData) {
   const description = formData.get('description') as string;
   const externalUrl = formData.get('url') as string;
   const eventDate = formData.get('date') as string;
-  const audienceType = formData.get('audienceType') as string;
+  const audienceType = formData.get('audienceType') as string; // 'global' or 'cohort'
+  const cohort = formData.get('cohort') as string;
+
+  // Map to stored audience format: 'all' for global, or specific cohort ID
+  const targetAudience = (audienceType === 'global' || !cohort) ? ['all'] : [cohort];
 
   // Linked resources (JSON strings from client)
   const linkedTestsRaw = formData.get('linkedTests') as string;
   const linkedActivitiesRaw = formData.get('linkedActivities') as string;
-  const linkedExternalEventsRaw = formData.get(
-    'linkedExternalEvents',
-  ) as string;
+  const linkedExternalEventsRaw = formData.get('linkedExternalEvents') as string;
 
-  const linkedTests: string[] = linkedTestsRaw
-    ? JSON.parse(linkedTestsRaw)
-    : [];
-  const linkedActivities: {
-    title: string;
-    description?: string;
-    startDate?: string;
-    endDate?: string;
-    url?: string;
-  }[] = linkedActivitiesRaw ? JSON.parse(linkedActivitiesRaw) : [];
-  const linkedExternalEvents: {
-    title: string;
-    url?: string;
-    startDate?: string;
-    endDate?: string;
-  }[] = linkedExternalEventsRaw ? JSON.parse(linkedExternalEventsRaw) : [];
+  const linkedTests: string[] = linkedTestsRaw ? JSON.parse(linkedTestsRaw) : [];
+  const linkedActivities: any[] = linkedActivitiesRaw ? JSON.parse(linkedActivitiesRaw) : [];
+  const linkedExternalEvents: any[] = linkedExternalEventsRaw ? JSON.parse(linkedExternalEventsRaw) : [];
 
   const newEvent = await Event.create({
     title,
     description,
     externalUrl,
     eventDate: new Date(eventDate),
-    targetAudience: [audienceType],
+    targetAudience,
     linkedTests: linkedTests.length > 0 ? linkedTests : [],
     linkedActivities: linkedActivities.map((a) => ({
       ...a,
@@ -137,7 +126,60 @@ export async function createEvent(formData: FormData) {
   });
 
   revalidatePath('/admin/events');
+  revalidatePath('/activities');
   return { success: true, eventId: newEvent._id.toString() };
+}
+
+export async function getEvents() {
+  await requireAdmin();
+  await dbConnect();
+
+  const events = await Event.find().sort({ createdAt: -1 });
+  return events.map(e => ({
+    id: e._id.toString(),
+    title: e.title,
+    description: e.description,
+    url: e.externalUrl,
+    date: e.eventDate?.toISOString(),
+    targetAudience: e.targetAudience,
+  }));
+}
+
+export async function updateEvent(id: string, formData: FormData) {
+  await requireAdmin();
+  await dbConnect();
+
+  const title = formData.get('title') as string;
+  const description = formData.get('description') as string;
+  const externalUrl = formData.get('url') as string;
+  const eventDate = formData.get('date') as string;
+  const audienceType = formData.get('audienceType') as string;
+  const cohort = formData.get('cohort') as string;
+
+  const targetAudience = audienceType === 'global' ? ['all'] : [cohort];
+
+  await Event.findByIdAndUpdate(id, {
+    title,
+    description,
+    externalUrl,
+    eventDate: new Date(eventDate),
+    targetAudience,
+  });
+
+  revalidatePath('/admin/events');
+  revalidatePath('/activities');
+  return { success: true };
+}
+
+export async function deleteEvent(id: string) {
+  await requireAdmin();
+  await dbConnect();
+
+  await Event.findByIdAndDelete(id);
+  
+  revalidatePath('/admin/events');
+  revalidatePath('/activities');
+  return { success: true };
 }
 
 // --- ACADEMIC TESTS FOR LINKING ---

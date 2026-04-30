@@ -1,61 +1,91 @@
 "use client";
 
+import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BookOpen, Activity } from "lucide-react";
+import {
+  LayoutDashboard,
+  Compass,
+  UserCircle,
+} from "lucide-react";
 import { motion } from "framer-motion";
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
-  "Academic Portfolio": BookOpen,
-  "Activities Hub": Activity,
+  "Dashboard": LayoutDashboard,
+  "Activities": Compass,
+  "Profile": UserCircle,
 };
 
-interface NavItem {
-  name: string;
-  href: string;
+export interface NavSection {
+  label: string;
+  items: { name: string; href: string }[];
 }
 
-export function StudentNavClient({ navItems }: { navItems: NavItem[] }) {
+interface Props {
+  sections: NavSection[];
+}
+
+export function StudentNavClient({ sections }: Props) {
   const pathname = usePathname();
 
   return (
-    <div className="space-y-1">
-      {navItems.map((item) => {
-        const Icon = iconMap[item.name] ?? BookOpen;
-        const isActive =
-          item.href === "/"
-            ? pathname === "/"
-            : pathname.startsWith(item.href);
+    <div className="space-y-5">
+      {sections.map((section) => (
+        <div key={section.label}>
+          {/* Section label */}
+          <p className="text-[9px] font-black uppercase tracking-[0.22em] px-3 mb-1.5 text-purple-muted-foreground">
+            {section.label}
+          </p>
 
-        return (
-          <Link key={item.name} href={item.href} className="block">
-            <motion.div
-              whileHover={{ x: 2 }}
-              transition={{ type: "spring", stiffness: 400, damping: 30 }}
-              className={`relative flex items-center gap-3 px-4 py-3 rounded-2xl text-[13px] font-medium
-                transition-all duration-300 group
-                ${isActive
-                  ? "bg-purple-primary/10 text-purple-primary font-bold shadow-[0_2px_10px_rgba(147,51,234,0.08)]"
-                  : "text-purple-muted-foreground hover:bg-purple-secondary/80 hover:text-purple-foreground"
-                }`}
-            >
-              {/* Active left bar indicator */}
-              {isActive && (
-                <motion.span
-                  layoutId="student-nav-active-bar"
-                  className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-6 bg-purple-primary rounded-r-full"
-                  transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                />
-              )}
-              <Icon
-                className={`w-[18px] h-[18px] shrink-0 transition-colors
-                  ${isActive ? "text-purple-primary" : "text-purple-muted-foreground group-hover:text-purple-foreground"}`}
-              />
-              <span className="font-heading tracking-wide">{item.name}</span>
-            </motion.div>
-          </Link>
-        );
-      })}
+          <div className="space-y-0.5">
+            {section.items.map((item) => {
+              const Icon = iconMap[item.name] ?? LayoutDashboard;
+              const isActive =
+                item.href === "/"
+                  ? pathname === "/"
+                  : pathname.startsWith(item.href);
+
+              return (
+                <Link key={item.name} href={item.href} className="block">
+                  <motion.div
+                    whileHover={{ x: isActive ? 0 : 2 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                    className={`relative flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] transition-colors duration-150 group
+                      ${
+                        isActive
+                          ? "text-purple-primary bg-purple-primary/10 border-l-2 border-purple-primary font-bold"
+                          : "text-purple-muted-foreground hover:text-purple-foreground hover:bg-purple-secondary/20 border-l-2 border-transparent font-medium"
+                      }`}
+                  >
+                    {/* Icon */}
+                    <Icon
+                      className={`w-[15px] h-[15px] shrink-0 transition-colors duration-150 relative z-10
+                        ${isActive ? "text-purple-primary" : "text-purple-muted-foreground/60 group-hover:text-purple-primary/80"}`}
+                    />
+
+                    {/* Label */}
+                    <span
+                      className="tracking-wide truncate relative z-10"
+                      style={{ fontSize: "13px" }}
+                    >
+                      {item.name}
+                    </span>
+
+                    {/* Active indicator dot */}
+                    {isActive && (
+                      <motion.span
+                        layoutId="student-nav-indicator"
+                        className="ml-auto w-1 h-1 rounded-full bg-purple-primary shrink-0 relative z-10"
+                        transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                      />
+                    )}
+                  </motion.div>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      ))}
     </div>
   );
 }

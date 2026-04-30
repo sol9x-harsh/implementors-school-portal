@@ -2,12 +2,13 @@ import Link from 'next/link';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { redirect } from 'next/navigation';
-import { Bell, Search } from 'lucide-react';
+import { Bell } from 'lucide-react';
 import {
   AdminNavClient,
   type NavSection,
 } from '@/components/admin/AdminNavClient';
 import { AdminSignOutButton } from '@/components/admin/AdminSignOutButton';
+import { AdminSearchBar } from '@/components/admin/AdminSearchBar';
 
 export default async function AdminLayout({
   children,
@@ -115,13 +116,7 @@ export default async function AdminLayout({
         {/* ── Top Bar ───────────────────────────────────────────── */}
         <header className='sticky top-0 z-20 bg-[oklch(0.975_0.006_285)]/90 backdrop-blur-md border-b border-purple-border/30 h-12 flex items-center gap-3 px-6'>
           {/* Search trigger */}
-          <button className='hidden md:flex items-center gap-2 h-7 px-3 rounded-lg bg-white border border-purple-border/40 text-purple-muted-foreground/60 text-[12px] font-medium hover:border-purple-border/70 transition-all duration-150'>
-            <Search className='w-3 h-3' />
-            <span>Quick search...</span>
-            <span className='ml-3 text-[10px] font-black bg-purple-secondary/60 px-1.5 py-0.5 rounded border border-purple-border/30 text-purple-muted-foreground/70'>
-              ⌘K
-            </span>
-          </button>
+          <AdminSearchBar />
 
           <div className='ml-auto flex items-center gap-1.5'>
             {/* Notification bell */}

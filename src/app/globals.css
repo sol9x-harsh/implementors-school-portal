@@ -198,11 +198,6 @@
   --glow-amber: oklch(0.78 0.16 75 / 0.2);
 }
 
-/* ─── Admin Theme Override ──────────────────────────────────── */
-.admin-theme {
-  --ring: var(--purple-primary);
-}
-
 /* ─── Base Layer ────────────────────────────────────────────── */
 @layer base {
   * {

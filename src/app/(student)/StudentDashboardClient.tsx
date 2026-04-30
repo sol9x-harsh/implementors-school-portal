@@ -7,32 +7,16 @@ import {
   CheckCircle2,
   Clock,
   ArrowRight,
-  Star,
   BookOpen,
   Activity,
-  TrendingUp,
-  Award,
-  ChevronRight,
-  Sparkles,
-  Zap,
-  Target,
   FileText,
+  AlertCircle,
+  ChevronRight,
+  ExternalLink,
+  CalendarDays,
+  Sparkles,
+  TrendingUp,
 } from 'lucide-react';
-
-// Props-driven data
-
-const container = {
-  hidden: { opacity: 0 },
-  show: { opacity: 1, transition: { staggerChildren: 0.1 } },
-} as const;
-const item = {
-  hidden: { opacity: 0, y: 20 },
-  show: {
-    opacity: 1,
-    y: 0,
-    transition: { type: 'spring', stiffness: 300, damping: 25 },
-  },
-} as const;
 
 function getGreeting() {
   const h = new Date().getHours();
@@ -44,13 +28,33 @@ function getGreeting() {
 interface StudentDashboardProps {
   initialData: {
     verifiedAchievements: number;
+    availableEvents: number;
     activeRequests: number;
     portfolioIntegrity: number;
-    subjects: any[];
+    subjects: { name: string; score: number; max: number }[];
   };
-  initialEvents: any[];
-  initialRequests: any[];
+  initialEvents: {
+    id: string;
+    title: string;
+    description?: string;
+    eventDate?: string;
+    externalUrl?: string;
+  }[];
+  initialRequests: {
+    id: string;
+    title: string;
+    deadline?: string;
+  }[];
 }
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 16 },
+  show: (i: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: { delay: i * 0.08, type: 'spring' as const, stiffness: 300, damping: 28 },
+  }),
+};
 
 export default function StudentDashboard({
   initialData,
@@ -58,339 +62,290 @@ export default function StudentDashboard({
   initialRequests,
 }: StudentDashboardProps) {
   const { data: session } = useSession();
+  const firstName = session?.user?.name?.split(' ')[0] ?? 'Scholar';
 
   const stats = [
     {
-      label: 'Verified Achievements',
-      value: initialData.verifiedAchievements.toString(),
-      sub: 'Added to institutional portfolio',
+      label: 'Activities Joined',
+      value: initialData.verifiedAchievements,
       icon: CheckCircle2,
-      gradient: 'bg-purple-gradient',
-      glow: 'rgba(147,51,234,0.15)',
+      color: 'text-emerald-600',
+      bg: 'bg-emerald-50 border-emerald-100',
+      iconBg: 'bg-emerald-500',
     },
     {
-      label: 'Active Requests',
-      value: initialData.activeRequests.toString(),
-      sub: 'Action required on credentials',
-      icon: Clock,
-      gradient: 'bg-purple-primary/80',
-      glow: 'rgba(147,51,234,0.1)',
+      label: 'Open Opportunities',
+      value: initialData.availableEvents,
+      icon: Activity,
+      color: 'text-purple-primary',
+      bg: 'bg-purple-secondary/30 border-purple-border/30',
+      iconBg: 'bg-purple-gradient',
     },
     {
-      label: 'Portfolio Integrity',
-      value: `${initialData.portfolioIntegrity}%`,
-      sub: 'Institutional readiness score',
-      icon: Target,
-      gradient: 'bg-purple-foreground/90',
-      glow: 'rgba(147,51,234,0.12)',
+      label: 'Pending Forms',
+      value: initialData.activeRequests,
+      icon: FileText,
+      color: 'text-amber-600',
+      bg: initialData.activeRequests > 0 ? 'bg-amber-50 border-amber-200' : 'bg-purple-secondary/30 border-purple-border/30',
+      iconBg: initialData.activeRequests > 0 ? 'bg-amber-500' : 'bg-purple-muted-foreground/40',
     },
   ];
 
-  const firstName = session?.user?.name?.split(' ')[0] ?? 'Scholar';
+  const urgentForms = initialRequests.filter((r) => {
+    if (!r.deadline) return false;
+    const diff = (new Date(r.deadline).getTime() - Date.now()) / (1000 * 60 * 60 * 24);
+    return diff <= 7;
+  });
 
   return (
-    <div className='p-8 lg:p-12 space-y-10 max-w-7xl mx-auto'>
-      {/* ── Hero Banner ─────────────────────────────────────── */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-      >
-        <div className='relative overflow-hidden rounded-5xl p-10 bg-purple-gradient shadow-purple-lg group'>
-          {/* Decorative mesh pattern overlay */}
-          <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 pointer-events-none" />
+    <div className='p-6 lg:p-10 space-y-8 max-w-6xl mx-auto pb-20'>
 
-          <div className='relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-8'>
-            <div className='space-y-4'>
-              <div className='flex items-center gap-2'>
-                <div className='px-3 py-1 rounded-full bg-white/20 backdrop-blur-md border border-white/20 text-[10px] font-black text-white uppercase tracking-widest'>
-                  Academic Session 2025-26
-                </div>
-                <div className='w-1.5 h-1.5 rounded-full bg-white/40 animate-pulse' />
-              </div>
-              <div>
-                <p className='text-white/80 font-medium text-sm mb-1'>
-                  {getGreeting()},
-                </p>
-                <h1 className='text-4xl md:text-5xl font-heading font-black text-white leading-tight'>
-                  {firstName} 👋
-                </h1>
-                <p className='text-white/70 mt-3 text-[15px] font-medium max-w-lg leading-relaxed'>
-                  Your academic trajectory is being indexed. Maintain the
-                  current momentum to maximize your institutional ranking.
-                </p>
-              </div>
-            </div>
-
-            <div className='flex flex-col gap-4'>
-              <Link
-                href='/activities'
-                className='flex items-center justify-center gap-3 bg-white text-purple-primary hover:bg-purple-secondary text-[13px]
-                  font-black uppercase tracking-widest px-8 py-4 rounded-3xl shadow-xl transition-all duration-300 hover:scale-[1.02] active:scale-95 border-none group'
-              >
-                <Activity className='w-4 h-4' />
-                Activities Hub
-                <ChevronRight className='w-4 h-4 group-hover:translate-x-1 transition-transform' />
-              </Link>
-              <div className='flex items-center justify-center gap-3 text-white/80 text-[11px] font-black uppercase tracking-widest'>
-                <TrendingUp className='w-4 h-4 text-white' />
-                Portfolio Status: {initialData.portfolioIntegrity}%
-              </div>
-            </div>
-          </div>
-        </div>
-      </motion.div>
-
-      {/* ── Stat Cards ──────────────────────────────────────── */}
-      <motion.div
-        variants={container}
-        initial='hidden'
-        animate='show'
-        className='grid grid-cols-1 md:grid-cols-3 gap-6'
-      >
-        {stats.map((s, i) => {
-          const Icon = s.icon;
-          return (
-            <motion.div key={s.label} variants={item}>
-              <div className='group relative overflow-hidden bg-white rounded-4xl p-8 border border-purple-border/30 shadow-purple transition-all duration-500 hover:shadow-purple-lg hover:-translate-y-1'>
-                <div className='absolute -right-4 -top-4 w-24 h-24 bg-purple-primary/5 rounded-full blur-2xl group-hover:bg-purple-primary/10 transition-colors' />
-                <div
-                  className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-6 shadow-purple transition-transform duration-500 group-hover:rotate-6 ${s.gradient}`}
-                >
-                  <Icon className='w-6 h-6 text-white' />
-                </div>
-                <div className='text-4xl font-heading font-black text-purple-foreground tracking-tight'>
-                  {s.value}
-                </div>
-                <div className='text-[11px] font-black text-purple-muted-foreground uppercase tracking-[0.2em] mt-3'>
-                  {s.label}
-                </div>
-                <p className='text-xs font-medium text-purple-muted-foreground/60 mt-1'>
-                  {s.sub}
-                </p>
-              </div>
-            </motion.div>
-          );
-        })}
-      </motion.div>
-
-      <div className='grid grid-cols-1 lg:grid-cols-5 gap-8 items-start'>
-        {/* ── Academic Portfolio ──────────────────────────────── */}
+      {/* ── Urgent Forms Banner ─────────────────────────────── */}
+      {urgentForms.length > 0 && (
         <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.3 }}
-          className='lg:col-span-3 space-y-6'
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className='rounded-2xl bg-amber-50 border border-amber-200 px-5 py-4 flex items-start gap-4'
         >
-          <div className='flex items-center justify-between px-2'>
-            <h2 className='text-xl font-heading font-black text-purple-foreground flex items-center gap-3'>
-              <BookOpen className='w-6 h-6 text-purple-primary' />
-              Academic Indices
-            </h2>
-            <div className='flex items-center gap-2 px-3 py-1 rounded-full bg-purple-secondary/40 border border-purple-border/20 text-[10px] font-black text-purple-primary uppercase tracking-widest'>
-              Term 1 Phase
-            </div>
+          <div className='w-9 h-9 rounded-xl bg-amber-500 flex items-center justify-center shrink-0'>
+            <AlertCircle className='w-5 h-5 text-white' />
           </div>
-
-          <div className='bg-white rounded-5xl border border-purple-border/30 shadow-purple p-8 space-y-6 relative overflow-hidden group'>
-            <div className='absolute top-0 right-0 w-32 h-32 bg-purple-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2' />
-            {initialData.subjects.map((s, i) => {
-              const pct = Math.round((s.score / s.max) * 100);
-              const colorClass =
-                pct >= 90
-                  ? 'bg-purple-primary'
-                  : pct >= 75
-                    ? 'bg-purple-primary/70'
-                    : 'bg-purple-muted-foreground/50';
-
-              return (
-                <motion.div
-                  key={s.name}
-                  initial={{ opacity: 0, x: -12 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.4 + i * 0.08 }}
-                  className='space-y-2 group/field'
+          <div className='flex-1 min-w-0'>
+            <p className='text-sm font-bold text-amber-800'>
+              {urgentForms.length === 1 ? '1 form requires' : `${urgentForms.length} forms require`} your attention — deadline within 7 days
+            </p>
+            <div className='flex flex-wrap gap-2 mt-2'>
+              {urgentForms.map((f) => (
+                <Link
+                  key={f.id}
+                  href={`/forms/${f.id}`}
+                  className='inline-flex items-center gap-1.5 text-[11px] font-black uppercase tracking-wider text-amber-700 bg-amber-100 hover:bg-amber-200 border border-amber-200 rounded-lg px-2.5 py-1.5 transition-colors'
                 >
-                  <div className='flex items-center justify-between'>
-                    <span className='text-[13px] font-bold text-purple-foreground group-hover/field:text-purple-primary transition-colors'>
-                      {s.name}
-                    </span>
-                    <span className='text-[13px] font-black text-purple-primary uppercase tracking-tighter'>
-                      {s.score}
-                      <span className='text-purple-muted-foreground/40 font-bold ml-0.5'>
-                        / {s.max}
-                      </span>
-                    </span>
-                  </div>
-                  <div className='h-3 bg-purple-secondary/50 rounded-full overflow-hidden p-0.5 border border-purple-border/10'>
-                    <motion.div
-                      initial={{ width: 0 }}
-                      animate={{ width: `${pct}%` }}
-                      transition={{
-                        delay: 0.5 + i * 0.08,
-                        duration: 1,
-                        ease: [0.34, 1.56, 0.64, 1],
-                      }}
-                      className={`h-full rounded-full transition-all duration-500 ${colorClass} shadow-sm`}
-                    />
-                  </div>
-                </motion.div>
-              );
-            })}
-            {initialData.subjects.length === 0 && (
-              <p className='text-center text-purple-muted-foreground py-8'>
-                No academic data available for this term.
-              </p>
-            )}
-            <div className='pt-4 flex items-center justify-center gap-6 border-t border-purple-border/10 mt-2'>
-              <div className='flex items-center gap-2'>
-                <div className='w-2 h-2 rounded-full bg-purple-primary' />
-                <span className='text-[10px] font-black text-purple-muted-foreground/60 uppercase tracking-widest'>
-                  Optimized
-                </span>
-              </div>
-              <div className='flex items-center gap-2'>
-                <div className='w-2 h-2 rounded-full bg-purple-primary/70' />
-                <span className='text-[10px] font-black text-purple-muted-foreground/60 uppercase tracking-widest'>
-                  Growth Phase
-                </span>
-              </div>
+                  {f.title}
+                  <ChevronRight className='w-3 h-3' />
+                </Link>
+              ))}
             </div>
           </div>
         </motion.div>
+      )}
 
-        {/* ── Upcoming Events ─────────────────────────────────── */}
-        <motion.div
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.4 }}
-          className='lg:col-span-2 space-y-6'
-        >
-          <div className='flex items-center justify-between px-2'>
-            <h2 className='text-xl font-heading font-black text-purple-foreground flex items-center gap-3'>
-              <Zap className='w-6 h-6 text-purple-primary' />
-              Strategic Ops
-            </h2>
+      {/* ── Hero ─────────────────────────────────────────────── */}
+      <motion.div initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+        <div className='relative overflow-hidden rounded-3xl bg-purple-gradient shadow-purple-lg px-8 py-10'>
+          <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.07] pointer-events-none" />
+          <div className='relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6'>
+            <div className='space-y-2'>
+              <p className='text-white/70 text-sm font-medium'>{getGreeting()},</p>
+              <h1 className='text-3xl md:text-4xl font-heading font-black text-white leading-tight'>
+                {firstName} 👋
+              </h1>
+              <p className='text-white/60 text-sm font-medium max-w-md leading-relaxed mt-1'>
+                Stay on top of your activities, track deadlines, and grow your academic record.
+              </p>
+            </div>
             <Link
               href='/activities'
-              className='text-[11px] text-purple-primary font-black uppercase tracking-widest flex items-center gap-2 hover:translate-x-1 transition-transform group'
+              className='self-start sm:self-center flex items-center gap-2.5 bg-white/20 hover:bg-white/30 text-white text-[12px]
+                font-black uppercase tracking-widest px-5 py-3 rounded-2xl transition-all duration-300 border border-white/20 backdrop-blur-sm whitespace-nowrap group'
             >
-              Global Hub{' '}
-              <ArrowRight className='w-3.5 h-3.5 group-hover:scale-110 transition-transform' />
+              <Activity className='w-4 h-4' />
+              View Activities
+              <ChevronRight className='w-4 h-4 group-hover:translate-x-0.5 transition-transform' />
             </Link>
           </div>
 
-          <div className='space-y-4'>
-            {initialEvents.map((ev, i) => (
-              <motion.div
-                key={ev.title}
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.5 + i * 0.1 }}
-              >
-                <div
-                  className='bg-white rounded-4xl border border-purple-border/30 shadow-purple p-6 flex items-center gap-5
-                  hover:border-purple-primary hover:shadow-purple-lg transition-all duration-300 group cursor-pointer overflow-hidden relative'
-                >
-                  <div className='absolute right-0 top-0 w-24 h-24 bg-purple-primary/5 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 group-hover:bg-purple-primary/10 transition-colors' />
-
-                  <div className='w-12 h-12 rounded-2xl bg-purple-secondary/80 border border-purple-border/20 flex items-center justify-center shrink-0 group-hover:bg-purple-primary group-hover:text-white transition-all duration-500 group-hover:rotate-12 group-hover:shadow-purple-sm'>
-                    <Award className='w-5 h-5 text-purple-primary group-hover:text-white' />
+          {/* Mini stats in hero */}
+          <div className='relative z-10 grid grid-cols-3 gap-3 mt-8 pt-6 border-t border-white/15'>
+            {stats.map((s) => {
+              const Icon = s.icon;
+              return (
+                <div key={s.label} className='flex items-center gap-2.5 bg-white/10 backdrop-blur-sm rounded-xl px-3 py-2.5 border border-white/10'>
+                  <div className={`w-8 h-8 rounded-lg ${s.iconBg} flex items-center justify-center shrink-0`}>
+                    <Icon className='w-4 h-4 text-white' />
                   </div>
-                  <div className='flex-1 min-w-0 relative z-10'>
-                    <p className='text-sm font-bold text-purple-foreground truncate group-hover:text-purple-primary transition-colors'>
-                      {ev.title}
-                    </p>
-                    <div className='flex items-center gap-3 mt-1.5'>
-                      <p className='text-[11px] font-bold text-purple-muted-foreground/60 uppercase tracking-tight'>
-                        {new Date(ev.eventDate).toLocaleDateString()}
-                      </p>
-                      <span
-                        className={`text-[10px] px-2.5 py-0.5 rounded-full font-black uppercase tracking-widest bg-purple-primary/10 text-purple-primary border border-purple-primary/5 shadow-sm`}
-                      >
-                        Featured
-                      </span>
-                    </div>
+                  <div>
+                    <p className='text-xl font-heading font-black text-white leading-tight'>{s.value}</p>
+                    <p className='text-[9px] font-bold text-white/50 uppercase tracking-wider leading-tight'>{s.label}</p>
                   </div>
-                  <ArrowRight className='w-5 h-5 text-purple-border/60 group-hover:text-purple-primary group-hover:translate-x-1 transition-all' />
                 </div>
-              </motion.div>
-            ))}
-
-            {initialEvents.length === 0 && (
-              <div className='p-6 rounded-4xl bg-purple-secondary/20 border border-purple-border/10 text-center space-y-3'>
-                <Sparkles className='w-6 h-6 text-purple-primary/40 mx-auto' />
-                <p className='text-[11px] font-bold text-purple-muted-foreground/60 leading-relaxed uppercase tracking-widest px-4'>
-                  New opportunities are indexed daily based on your profile
-                  specialization.
-                </p>
-              </div>
-            )}
+              );
+            })}
           </div>
-        </motion.div>
-      </div>
-
-      {/* ── Active Data Requests ─────────────────────────────────── */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.5 }}
-        className='mt-8 space-y-6'
-      >
-        <div className='flex items-center justify-between px-2'>
-          <h2 className='text-xl font-heading font-black text-purple-foreground flex items-center gap-3'>
-            <FileText className='w-6 h-6 text-purple-primary' />
-            Pending Action Items
-          </h2>
-          <div className='flex items-center gap-2 px-3 py-1 rounded-full bg-purple-secondary/40 border border-purple-border/20 text-[10px] font-black text-purple-primary uppercase tracking-widest'>
-            {initialRequests.length} Required
-          </div>
-        </div>
-
-        <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-          {initialRequests.map((req, i) => (
-            <motion.div
-              key={req.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.6 + i * 0.1 }}
-            >
-              <Link href={`/forms/${req.id}`}>
-                <div
-                  className='bg-white rounded-4xl border border-purple-border/30 shadow-purple p-6 flex items-center gap-5
-                  hover:border-purple-primary hover:shadow-purple-lg transition-all duration-300 group cursor-pointer overflow-hidden relative'
-                >
-                  <div className='absolute right-0 top-0 w-24 h-24 bg-purple-primary/5 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 group-hover:bg-purple-primary/10 transition-colors' />
-
-                  <div className='w-12 h-12 rounded-2xl bg-purple-secondary/80 border border-purple-border/20 flex items-center justify-center shrink-0 group-hover:bg-purple-primary group-hover:text-white transition-all duration-500 group-hover:-rotate-12 group-hover:shadow-purple-sm'>
-                    <FileText className='w-5 h-5 text-purple-primary group-hover:text-white' />
-                  </div>
-                  <div className='flex-1 min-w-0 relative z-10'>
-                    <p className='text-sm font-bold text-purple-foreground truncate group-hover:text-purple-primary transition-colors'>
-                      {req.title}
-                    </p>
-                    <div className='flex items-center gap-3 mt-1.5'>
-                      <p className='text-[11px] font-bold text-red-500/80 uppercase tracking-tight'>
-                        Due {new Date(req.deadline).toLocaleDateString()}
-                      </p>
-                    </div>
-                  </div>
-                  <ArrowRight className='w-5 h-5 text-purple-border/60 group-hover:text-purple-primary group-hover:translate-x-1 transition-all' />
-                </div>
-              </Link>
-            </motion.div>
-          ))}
-
-          {initialRequests.length === 0 && (
-            <div className='col-span-full p-6 rounded-4xl bg-purple-secondary/20 border border-purple-border/10 text-center space-y-3'>
-              <CheckCircle2 className='w-6 h-6 text-purple-primary/40 mx-auto' />
-              <p className='text-[11px] font-bold text-purple-muted-foreground/60 leading-relaxed uppercase tracking-widest px-4'>
-                All institutional requests have been fulfilled.
-              </p>
-            </div>
-          )}
         </div>
       </motion.div>
+
+      {/* ── Main grid ─────────────────────────────────────────── */}
+      <div className='grid grid-cols-1 lg:grid-cols-5 gap-8 items-start'>
+
+        {/* ── Latest Activities ─────────────────────────────── */}
+        <motion.section
+          custom={0} variants={fadeUp} initial='hidden' animate='show'
+          className='lg:col-span-3 space-y-4'
+        >
+          <div className='flex items-center justify-between'>
+            <h2 className='text-base font-heading font-black text-purple-foreground flex items-center gap-2'>
+              <Sparkles className='w-5 h-5 text-purple-primary' />
+              Latest Activities
+            </h2>
+            <Link
+              href='/activities'
+              className='text-[11px] text-purple-primary font-black uppercase tracking-widest flex items-center gap-1.5 hover:translate-x-0.5 transition-transform group'
+            >
+              View all <ArrowRight className='w-3 h-3 group-hover:translate-x-0.5 transition-transform' />
+            </Link>
+          </div>
+
+          {initialEvents.length > 0 ? (
+            <div className='space-y-3'>
+              {initialEvents.slice(0, 5).map((ev, i) => (
+                <motion.div key={ev.id} custom={i + 1} variants={fadeUp} initial='hidden' animate='show'>
+                  <div className='bg-white rounded-2xl border border-purple-border/30 shadow-purple p-4 flex items-center gap-4
+                    hover:border-purple-primary/40 hover:shadow-purple-lg transition-all duration-300 group'>
+                    <div className='w-10 h-10 rounded-xl bg-purple-secondary/60 border border-purple-border/20 flex items-center justify-center shrink-0
+                      group-hover:bg-purple-gradient group-hover:shadow-purple-sm transition-all duration-300'>
+                      <Activity className='w-4 h-4 text-purple-primary group-hover:text-white' />
+                    </div>
+                    <div className='flex-1 min-w-0'>
+                      <p className='text-sm font-bold text-purple-foreground truncate group-hover:text-purple-primary transition-colors'>
+                        {ev.title}
+                      </p>
+                      {ev.eventDate && (
+                        <div className='flex items-center gap-1.5 mt-0.5'>
+                          <CalendarDays className='w-3 h-3 text-purple-muted-foreground/50' />
+                          <p className='text-[11px] text-purple-muted-foreground/70 font-medium'>
+                            {new Date(ev.eventDate).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                    {ev.externalUrl && (
+                      <a href={ev.externalUrl} target='_blank' rel='noopener noreferrer' className='shrink-0'>
+                        <ExternalLink className='w-4 h-4 text-purple-border/60 group-hover:text-purple-primary transition-colors' />
+                      </a>
+                    )}
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          ) : (
+            <div className='bg-white rounded-2xl border border-purple-border/20 p-10 text-center space-y-3'>
+              <Sparkles className='w-8 h-8 text-purple-primary/20 mx-auto' />
+              <p className='text-sm font-bold text-purple-muted-foreground'>No activities yet</p>
+              <p className='text-xs text-purple-muted-foreground/60'>New opportunities are published regularly. Check back soon.</p>
+            </div>
+          )}
+        </motion.section>
+
+        {/* ── Right column ────────────────────────────────────── */}
+        <div className='lg:col-span-2 space-y-6'>
+
+          {/* Pending Forms */}
+          <motion.section custom={2} variants={fadeUp} initial='hidden' animate='show' className='space-y-4'>
+            <div className='flex items-center justify-between'>
+              <h2 className='text-base font-heading font-black text-purple-foreground flex items-center gap-2'>
+                <FileText className='w-5 h-5 text-purple-primary' />
+                Pending Forms
+              </h2>
+              {initialRequests.length > 0 && (
+                <span className='text-[10px] bg-amber-500 text-white px-2.5 py-0.5 rounded-full font-black uppercase tracking-widest'>
+                  {initialRequests.length} Due
+                </span>
+              )}
+            </div>
+
+            {initialRequests.length > 0 ? (
+              <div className='space-y-3'>
+                {initialRequests.slice(0, 4).map((req, i) => {
+                  const daysLeft = req.deadline
+                    ? Math.ceil((new Date(req.deadline).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+                    : null;
+                  const isUrgent = daysLeft !== null && daysLeft <= 3;
+                  return (
+                    <motion.div key={req.id} custom={i + 3} variants={fadeUp} initial='hidden' animate='show'>
+                      <Link href={`/forms/${req.id}`}>
+                        <div className={`bg-white rounded-2xl border shadow-purple p-4 flex items-center gap-4
+                          hover:shadow-purple-lg transition-all duration-300 group cursor-pointer
+                          ${isUrgent ? 'border-amber-200 hover:border-amber-300' : 'border-purple-border/30 hover:border-purple-primary/40'}`}
+                        >
+                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-all duration-300
+                            ${isUrgent ? 'bg-amber-50' : 'bg-purple-secondary/60 border border-purple-border/20 group-hover:bg-purple-gradient group-hover:shadow-purple-sm'}`}
+                          >
+                            <Clock className={`w-4 h-4 ${isUrgent ? 'text-amber-500' : 'text-purple-primary group-hover:text-white'}`} />
+                          </div>
+                          <div className='flex-1 min-w-0'>
+                            <p className='text-sm font-bold text-purple-foreground truncate group-hover:text-purple-primary transition-colors'>
+                              {req.title}
+                            </p>
+                            {daysLeft !== null && (
+                              <p className={`text-[11px] font-bold mt-0.5 ${isUrgent ? 'text-amber-600' : 'text-purple-muted-foreground/70'}`}>
+                                {daysLeft <= 0 ? 'Overdue!' : `${daysLeft}d left`}
+                              </p>
+                            )}
+                          </div>
+                          <ArrowRight className='w-4 h-4 text-purple-border/50 group-hover:text-purple-primary group-hover:translate-x-0.5 transition-all' />
+                        </div>
+                      </Link>
+                    </motion.div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className='bg-white rounded-2xl border border-purple-border/20 p-8 text-center space-y-2'>
+                <CheckCircle2 className='w-8 h-8 text-emerald-400 mx-auto' />
+                <p className='text-sm font-bold text-purple-muted-foreground'>All clear!</p>
+                <p className='text-xs text-purple-muted-foreground/60'>No pending forms right now.</p>
+              </div>
+            )}
+          </motion.section>
+
+          {/* Academic Grades — only shown if data exists */}
+          {initialData.subjects.length > 0 && (
+            <motion.section custom={4} variants={fadeUp} initial='hidden' animate='show' className='space-y-4'>
+              <div className='flex items-center justify-between'>
+                <h2 className='text-base font-heading font-black text-purple-foreground flex items-center gap-2'>
+                  <TrendingUp className='w-5 h-5 text-purple-primary' />
+                  Academic Grades
+                </h2>
+                <span className='text-[10px] bg-purple-secondary px-2.5 py-0.5 rounded-full text-purple-primary font-black uppercase tracking-widest border border-purple-border/30'>
+                  Term 1
+                </span>
+              </div>
+
+              <div className='bg-white rounded-2xl border border-purple-border/30 shadow-purple p-5 space-y-4'>
+                {initialData.subjects.map((s, i) => {
+                  const pct = Math.round((s.score / s.max) * 100);
+                  const barColor = pct >= 90 ? 'bg-emerald-500' : pct >= 75 ? 'bg-purple-primary' : 'bg-amber-400';
+                  return (
+                    <motion.div
+                      key={s.name}
+                      initial={{ opacity: 0, x: -8 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.5 + i * 0.07 }}
+                      className='space-y-1.5'
+                    >
+                      <div className='flex items-center justify-between'>
+                        <span className='text-[12px] font-bold text-purple-foreground'>{s.name}</span>
+                        <span className='text-[12px] font-black text-purple-primary'>
+                          {s.score}<span className='text-purple-muted-foreground/40 font-bold'>/{s.max}</span>
+                        </span>
+                      </div>
+                      <div className='h-2 bg-purple-secondary/50 rounded-full overflow-hidden'>
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ width: `${pct}%` }}
+                          transition={{ delay: 0.6 + i * 0.07, duration: 0.8, ease: [0.34, 1.56, 0.64, 1] }}
+                          className={`h-full rounded-full ${barColor}`}
+                        />
+                      </div>
+                    </motion.div>
+                  );
+                })}
+              </div>
+            </motion.section>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

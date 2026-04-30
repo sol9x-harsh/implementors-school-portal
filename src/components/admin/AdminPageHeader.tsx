@@ -3,6 +3,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import type { LucideIcon } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 
 interface AdminPageHeaderProps {
   /** e.g. "Management", "Academics", "Engagement" */
@@ -33,7 +34,7 @@ export function AdminPageHeader({
           <span className='px-2.5 py-0.5 rounded-md bg-purple-primary/10 text-[10px] font-black text-purple-primary uppercase tracking-widest'>
             Admin
           </span>
-          <span className='w-1 h-1 rounded-full bg-purple-border/60' />
+          <ChevronRight className='w-3 h-3 text-purple-primary' />
           <span className='text-[10px] font-black text-purple-muted-foreground uppercase tracking-widest'>
             {section}
           </span>

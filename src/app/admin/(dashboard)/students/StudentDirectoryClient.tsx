@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo, useRef, useTransition } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 import { flexRender, useReactTable } from '@tanstack/react-table';
 import {
@@ -59,8 +60,9 @@ function parseCsv(text: string): Record<string, string>[] {
 export default function StudentDirectoryClient({ initialStudents }: StudentDirectoryClientProps) {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const searchParams = useSearchParams();
   const [sorting, setSorting] = useState<SortingState>([]);
-  const [globalFilter, setGlobalFilter] = useState('');
+  const [globalFilter, setGlobalFilter] = useState(searchParams.get('q') ?? '');
   const [typeFilter, setTypeFilter] = useState('ALL');
   const [streamFilter, setStreamFilter] = useState('ALL');
   const [isBulkOpen, setIsBulkOpen] = useState(false);
@@ -72,6 +74,12 @@ export default function StudentDirectoryClient({ initialStudents }: StudentDirec
 
   const [isMounted, setIsMounted] = useState(false);
   useEffect(() => setIsMounted(true), []);
+
+  // Keep filter in sync when URL param changes (from topbar search)
+  useEffect(() => {
+    const q = searchParams.get('q') ?? '';
+    setGlobalFilter(q);
+  }, [searchParams]);
 
   const filteredStudents = useMemo(() => {
     let data = initialStudents;
