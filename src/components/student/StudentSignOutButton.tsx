@@ -11,11 +11,10 @@ export function StudentSignOutButton() {
     <>
       <button
         onClick={() => setShowDialog(true)}
-        className="flex items-center justify-center gap-2.5 px-4 py-3 rounded-2xl text-sm font-semibold
-          text-red-500 bg-red-50/50 hover:bg-red-50 hover:text-red-600 transition-all duration-300 w-full"
+        className="flex items-center gap-3 px-4 py-3 rounded-[10px] text-[13px] font-bold text-slate-500 hover:text-slate-900 transition-all w-full"
       >
-        <LogOut className="w-4 h-4 shrink-0" />
-        Log Out
+        <LogOut className="w-5 h-5 shrink-0" />
+        Log out
       </button>
 
       <SignOutDialog 

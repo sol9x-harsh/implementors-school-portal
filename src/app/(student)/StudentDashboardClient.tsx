@@ -7,7 +7,6 @@ import {
   CheckCircle2,
   Clock,
   ArrowRight,
-  BookOpen,
   Activity,
   FileText,
   AlertCircle,
@@ -16,6 +15,8 @@ import {
   CalendarDays,
   Sparkles,
   TrendingUp,
+  Zap,
+  Target,
 } from 'lucide-react';
 
 function getGreeting() {
@@ -52,7 +53,12 @@ const fadeUp = {
   show: (i: number) => ({
     opacity: 1,
     y: 0,
-    transition: { delay: i * 0.08, type: 'spring' as const, stiffness: 300, damping: 28 },
+    transition: {
+      delay: i * 0.08,
+      type: 'spring' as const,
+      stiffness: 300,
+      damping: 28,
+    },
   }),
 };
 
@@ -69,57 +75,70 @@ export default function StudentDashboard({
       label: 'Activities Joined',
       value: initialData.verifiedAchievements,
       icon: CheckCircle2,
-      color: 'text-emerald-600',
-      bg: 'bg-emerald-50 border-emerald-100',
-      iconBg: 'bg-emerald-500',
+      color: 'text-student-primary',
+      bg: 'bg-student-secondary/40 border-student-border/30',
+      iconBg: 'bg-student-gradient',
     },
     {
       label: 'Open Opportunities',
       value: initialData.availableEvents,
       icon: Activity,
-      color: 'text-purple-primary',
-      bg: 'bg-purple-secondary/30 border-purple-border/30',
-      iconBg: 'bg-purple-gradient',
+      color: 'text-student-accent-foreground',
+      bg: 'bg-student-accent/30 border-student-border/30',
+      iconBg: 'bg-student-accent',
     },
     {
       label: 'Pending Forms',
       value: initialData.activeRequests,
       icon: FileText,
-      color: 'text-amber-600',
-      bg: initialData.activeRequests > 0 ? 'bg-amber-50 border-amber-200' : 'bg-purple-secondary/30 border-purple-border/30',
-      iconBg: initialData.activeRequests > 0 ? 'bg-amber-500' : 'bg-purple-muted-foreground/40',
+      color:
+        initialData.activeRequests > 0
+          ? 'text-student-warning'
+          : 'text-student-muted-foreground',
+      bg:
+        initialData.activeRequests > 0
+          ? 'bg-student-warning/10 border-student-warning/30'
+          : 'bg-student-secondary/30 border-student-border/30',
+      iconBg:
+        initialData.activeRequests > 0
+          ? 'bg-student-warning'
+          : 'bg-student-muted-foreground/40',
     },
   ];
 
   const urgentForms = initialRequests.filter((r) => {
     if (!r.deadline) return false;
-    const diff = (new Date(r.deadline).getTime() - Date.now()) / (1000 * 60 * 60 * 24);
+    const diff =
+      (new Date(r.deadline).getTime() - Date.now()) / (1000 * 60 * 60 * 24);
     return diff <= 7;
   });
 
   return (
-    <div className='p-6 lg:p-10 space-y-8 max-w-6xl mx-auto pb-20'>
-
+    <div className='p-4 lg:p-8 max-w-[1400px] mx-auto pb-24'>
+      
       {/* ── Urgent Forms Banner ─────────────────────────────── */}
       {urgentForms.length > 0 && (
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className='rounded-2xl bg-amber-50 border border-amber-200 px-5 py-4 flex items-start gap-4'
+          className='mb-6 rounded-[2rem] bg-student-warning/10 border border-student-warning/30 px-6 py-5 flex items-start gap-4 backdrop-blur-md'
         >
-          <div className='w-9 h-9 rounded-xl bg-amber-500 flex items-center justify-center shrink-0'>
+          <div className='w-10 h-10 rounded-2xl bg-student-warning flex items-center justify-center shrink-0 shadow-sm'>
             <AlertCircle className='w-5 h-5 text-white' />
           </div>
           <div className='flex-1 min-w-0'>
-            <p className='text-sm font-bold text-amber-800'>
-              {urgentForms.length === 1 ? '1 form requires' : `${urgentForms.length} forms require`} your attention — deadline within 7 days
+            <p className='text-sm font-bold text-student-warning'>
+              {urgentForms.length === 1
+                ? '1 form requires'
+                : `${urgentForms.length} forms require`}{' '}
+              your attention — deadline within 7 days
             </p>
-            <div className='flex flex-wrap gap-2 mt-2'>
+            <div className='flex flex-wrap gap-2 mt-3'>
               {urgentForms.map((f) => (
                 <Link
                   key={f.id}
                   href={`/forms/${f.id}`}
-                  className='inline-flex items-center gap-1.5 text-[11px] font-black uppercase tracking-wider text-amber-700 bg-amber-100 hover:bg-amber-200 border border-amber-200 rounded-lg px-2.5 py-1.5 transition-colors'
+                  className='inline-flex items-center gap-1.5 text-[11px] font-black uppercase tracking-wider text-student-warning bg-white/50 hover:bg-white border border-student-warning/20 rounded-xl px-3 py-2 transition-colors'
                 >
                   {f.title}
                   <ChevronRight className='w-3 h-3' />
@@ -130,220 +149,253 @@ export default function StudentDashboard({
         </motion.div>
       )}
 
-      {/* ── Hero ─────────────────────────────────────────────── */}
-      <motion.div initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-        <div className='relative overflow-hidden rounded-3xl bg-purple-gradient shadow-purple-lg px-8 py-10'>
-          <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.07] pointer-events-none" />
-          <div className='relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6'>
-            <div className='space-y-2'>
-              <p className='text-white/70 text-sm font-medium'>{getGreeting()},</p>
-              <h1 className='text-3xl md:text-4xl font-heading font-black text-white leading-tight'>
-                {firstName} 👋
-              </h1>
-              <p className='text-white/60 text-sm font-medium max-w-md leading-relaxed mt-1'>
-                Stay on top of your activities, track deadlines, and grow your academic record.
-              </p>
+      {/* ── Page Header ─────────────────────────────────────── */}
+      <div className="mb-8 flex items-end justify-between">
+        <div>
+          <h1 className="text-3xl font-heading font-black text-slate-900 tracking-tight">
+            Welcome back, {firstName}!
+          </h1>
+          <p className="text-sm text-slate-500 font-medium mt-1">
+            It is the best time to manage your activities and portfolio.
+          </p>
+        </div>
+        <div className="hidden sm:flex items-center gap-3">
+          <Link href="/activities" className="bg-indigo-600 hover:bg-indigo-700 text-white text-[12px] font-bold px-5 py-2.5 rounded-full transition-colors">
+            + Explore Activities
+          </Link>
+        </div>
+      </div>
+
+      {/* ── Stat Cards ──────────────────────────────────────── */}
+      <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-6'>
+        {[
+          {
+            icon: Zap,
+            label: 'Activities Joined',
+            value: initialData.verifiedAchievements,
+            delay: 0.1,
+            trend: '+2 this month',
+            trendUp: true
+          },
+          {
+            icon: Target,
+            label: 'Open Opportunities',
+            value: initialData.availableEvents,
+            delay: 0.2,
+            trend: '3 new',
+            trendUp: true
+          },
+          {
+            icon: FileText,
+            label: 'Pending Forms',
+            value: initialData.activeRequests,
+            delay: 0.3,
+            trend: initialData.activeRequests > 0 ? 'Action needed' : 'All clear',
+            trendUp: initialData.activeRequests === 0
+          },
+          {
+            icon: TrendingUp,
+            label: 'Avg Score',
+            value: initialData.subjects.length > 0 ? `${Math.round(initialData.subjects.reduce((acc, curr) => acc + (curr.score / curr.max) * 100, 0) / initialData.subjects.length)}%` : 'N/A',
+            delay: 0.4,
+            trend: 'vs last term',
+            trendUp: true
+          }
+        ].map((card, i) => (
+          <motion.div
+            key={card.label}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: card.delay }}
+            className='bento-card p-5 flex flex-col justify-between min-h-[140px]'
+          >
+            <div className='flex justify-between items-start mb-4'>
+              <p className='text-[14px] font-bold text-slate-900'>{card.label}</p>
+              <div className='w-8 h-8 rounded-full border border-slate-100 flex items-center justify-center text-slate-400 hover:text-indigo-600 transition-colors cursor-pointer'>
+                <ArrowRight className='w-3.5 h-3.5 -rotate-45' />
+              </div>
+            </div>
+            
+            <p className='text-3xl font-heading font-black text-slate-900 leading-none mb-3'>
+              {card.value}
+            </p>
+            
+            <div className={`inline-flex self-start items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold ${card.trendUp ? 'bg-teal-50 text-teal-600' : 'bg-amber-50 text-amber-600'}`}>
+               {card.trendUp ? '↑' : '↓'} {card.trend}
+            </div>
+          </motion.div>
+        ))}
+      </div>
+
+      {/* ── Main Grid ────────────────────────────────────────── */}
+      <div className='grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6'>
+
+        {/* ── Latest Activities (Span 8) ────────────────────── */}
+        <motion.div
+          custom={1}
+          variants={fadeUp}
+          initial='hidden'
+          animate='show'
+          className='col-span-1 lg:col-span-8 bento-card p-6 lg:p-8 flex flex-col'
+        >
+          <div className='flex items-center justify-between mb-6'>
+            <div className='flex items-center gap-3'>
+              <div className='w-10 h-10 rounded-xl bg-student-primary/10 flex items-center justify-center border border-student-primary/20'>
+                <Sparkles className='w-5 h-5 text-student-primary' />
+              </div>
+              <h2 className='text-lg font-heading font-black text-student-foreground'>
+                Latest Activities
+              </h2>
             </div>
             <Link
               href='/activities'
-              className='self-start sm:self-center flex items-center gap-2.5 bg-white/20 hover:bg-white/30 text-white text-[12px]
-                font-black uppercase tracking-widest px-5 py-3 rounded-2xl transition-all duration-300 border border-white/20 backdrop-blur-sm whitespace-nowrap group'
+              className='text-[11px] text-student-primary font-black uppercase tracking-widest flex items-center gap-1.5 hover:opacity-80 transition-opacity group'
             >
-              <Activity className='w-4 h-4' />
-              View Activities
-              <ChevronRight className='w-4 h-4 group-hover:translate-x-0.5 transition-transform' />
+              View all <ArrowRight className='w-3 h-3 group-hover:translate-x-1 transition-transform' />
             </Link>
           </div>
 
-          {/* Mini stats in hero */}
-          <div className='relative z-10 grid grid-cols-3 gap-3 mt-8 pt-6 border-t border-white/15'>
-            {stats.map((s) => {
-              const Icon = s.icon;
-              return (
-                <div key={s.label} className='flex items-center gap-2.5 bg-white/10 backdrop-blur-sm rounded-xl px-3 py-2.5 border border-white/10'>
-                  <div className={`w-8 h-8 rounded-lg ${s.iconBg} flex items-center justify-center shrink-0`}>
-                    <Icon className='w-4 h-4 text-white' />
+          <div className='flex-1 flex flex-col gap-3'>
+            {initialEvents.length > 0 ? (
+              initialEvents.slice(0, 4).map((ev, i) => (
+                <div
+                  key={ev.id}
+                  className='bg-white/50 hover:bg-white rounded-[1.25rem] border border-white shadow-sm p-4 flex items-center gap-4 transition-all duration-300 group'
+                >
+                  <div className='w-12 h-12 rounded-xl bg-student-secondary/20 border border-white flex items-center justify-center shrink-0 group-hover:bg-student-gradient group-hover:shadow-student-sm transition-all duration-300'>
+                    <Activity className='w-5 h-5 text-student-primary group-hover:text-white transition-colors' />
                   </div>
-                  <div>
-                    <p className='text-xl font-heading font-black text-white leading-tight'>{s.value}</p>
-                    <p className='text-[9px] font-bold text-white/50 uppercase tracking-wider leading-tight'>{s.label}</p>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </motion.div>
-
-      {/* ── Main grid ─────────────────────────────────────────── */}
-      <div className='grid grid-cols-1 lg:grid-cols-5 gap-8 items-start'>
-
-        {/* ── Latest Activities ─────────────────────────────── */}
-        <motion.section
-          custom={0} variants={fadeUp} initial='hidden' animate='show'
-          className='lg:col-span-3 space-y-4'
-        >
-          <div className='flex items-center justify-between'>
-            <h2 className='text-base font-heading font-black text-purple-foreground flex items-center gap-2'>
-              <Sparkles className='w-5 h-5 text-purple-primary' />
-              Latest Activities
-            </h2>
-            <Link
-              href='/activities'
-              className='text-[11px] text-purple-primary font-black uppercase tracking-widest flex items-center gap-1.5 hover:translate-x-0.5 transition-transform group'
-            >
-              View all <ArrowRight className='w-3 h-3 group-hover:translate-x-0.5 transition-transform' />
-            </Link>
-          </div>
-
-          {initialEvents.length > 0 ? (
-            <div className='space-y-3'>
-              {initialEvents.slice(0, 5).map((ev, i) => (
-                <motion.div key={ev.id} custom={i + 1} variants={fadeUp} initial='hidden' animate='show'>
-                  <div className='bg-white rounded-2xl border border-purple-border/30 shadow-purple p-4 flex items-center gap-4
-                    hover:border-purple-primary/40 hover:shadow-purple-lg transition-all duration-300 group'>
-                    <div className='w-10 h-10 rounded-xl bg-purple-secondary/60 border border-purple-border/20 flex items-center justify-center shrink-0
-                      group-hover:bg-purple-gradient group-hover:shadow-purple-sm transition-all duration-300'>
-                      <Activity className='w-4 h-4 text-purple-primary group-hover:text-white' />
-                    </div>
-                    <div className='flex-1 min-w-0'>
-                      <p className='text-sm font-bold text-purple-foreground truncate group-hover:text-purple-primary transition-colors'>
-                        {ev.title}
-                      </p>
-                      {ev.eventDate && (
-                        <div className='flex items-center gap-1.5 mt-0.5'>
-                          <CalendarDays className='w-3 h-3 text-purple-muted-foreground/50' />
-                          <p className='text-[11px] text-purple-muted-foreground/70 font-medium'>
-                            {new Date(ev.eventDate).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                    {ev.externalUrl && (
-                      <a href={ev.externalUrl} target='_blank' rel='noopener noreferrer' className='shrink-0'>
-                        <ExternalLink className='w-4 h-4 text-purple-border/60 group-hover:text-purple-primary transition-colors' />
-                      </a>
+                  <div className='flex-1 min-w-0'>
+                    <p className='text-[15px] font-bold text-student-foreground truncate group-hover:text-student-primary transition-colors'>
+                      {ev.title}
+                    </p>
+                    {ev.eventDate && (
+                      <div className='flex items-center gap-1.5 mt-1'>
+                        <CalendarDays className='w-3.5 h-3.5 text-student-muted-foreground/60' />
+                        <p className='text-[12px] text-student-muted-foreground/80 font-medium'>
+                          {new Date(ev.eventDate).toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })}
+                        </p>
+                      </div>
                     )}
                   </div>
-                </motion.div>
-              ))}
-            </div>
-          ) : (
-            <div className='bg-white rounded-2xl border border-purple-border/20 p-10 text-center space-y-3'>
-              <Sparkles className='w-8 h-8 text-purple-primary/20 mx-auto' />
-              <p className='text-sm font-bold text-purple-muted-foreground'>No activities yet</p>
-              <p className='text-xs text-purple-muted-foreground/60'>New opportunities are published regularly. Check back soon.</p>
-            </div>
-          )}
-        </motion.section>
+                  {ev.externalUrl && (
+                    <a href={ev.externalUrl} target='_blank' rel='noopener noreferrer' className='shrink-0 w-10 h-10 rounded-xl bg-white flex items-center justify-center hover:bg-student-primary/10 border border-student-border/20 transition-colors'>
+                      <ExternalLink className='w-4 h-4 text-student-muted-foreground hover:text-student-primary transition-colors' />
+                    </a>
+                  )}
+                </div>
+              ))
+            ) : (
+              <div className='flex-1 flex flex-col items-center justify-center border-2 border-dashed border-student-border/50 rounded-[1.25rem] p-8 text-center'>
+                <Sparkles className='w-8 h-8 text-student-primary/30 mb-3' />
+                <p className='text-sm font-bold text-student-muted-foreground'>No activities yet</p>
+                <p className='text-[11px] text-student-muted-foreground/60 mt-1'>New opportunities are published regularly.</p>
+              </div>
+            )}
+          </div>
+        </motion.div>
 
-        {/* ── Right column ────────────────────────────────────── */}
-        <div className='lg:col-span-2 space-y-6'>
-
+        {/* ── Secondary Column (Span 4) ─────────────────────── */}
+        <div className='col-span-1 lg:col-span-4 flex flex-col gap-4 lg:gap-6'>
+          
           {/* Pending Forms */}
-          <motion.section custom={2} variants={fadeUp} initial='hidden' animate='show' className='space-y-4'>
-            <div className='flex items-center justify-between'>
-              <h2 className='text-base font-heading font-black text-purple-foreground flex items-center gap-2'>
-                <FileText className='w-5 h-5 text-purple-primary' />
+          <motion.div
+            custom={2}
+            variants={fadeUp}
+            initial='hidden'
+            animate='show'
+            className='bento-card p-6 flex flex-col'
+          >
+            <div className='flex items-center justify-between mb-5'>
+              <h2 className='text-[15px] font-heading font-black text-student-foreground flex items-center gap-2'>
+                <FileText className='w-4 h-4 text-student-primary' />
                 Pending Forms
               </h2>
               {initialRequests.length > 0 && (
-                <span className='text-[10px] bg-amber-500 text-white px-2.5 py-0.5 rounded-full font-black uppercase tracking-widest'>
+                <span className='text-[9px] bg-student-warning text-white px-2 py-0.5 rounded-md font-black uppercase tracking-widest shadow-sm'>
                   {initialRequests.length} Due
                 </span>
               )}
             </div>
 
-            {initialRequests.length > 0 ? (
-              <div className='space-y-3'>
-                {initialRequests.slice(0, 4).map((req, i) => {
-                  const daysLeft = req.deadline
-                    ? Math.ceil((new Date(req.deadline).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
-                    : null;
+            <div className='flex flex-col gap-3'>
+              {initialRequests.length > 0 ? (
+                initialRequests.slice(0, 3).map((req) => {
+                  const daysLeft = req.deadline ? Math.ceil((new Date(req.deadline).getTime() - Date.now()) / (1000 * 60 * 60 * 24)) : null;
                   const isUrgent = daysLeft !== null && daysLeft <= 3;
                   return (
-                    <motion.div key={req.id} custom={i + 3} variants={fadeUp} initial='hidden' animate='show'>
-                      <Link href={`/forms/${req.id}`}>
-                        <div className={`bg-white rounded-2xl border shadow-purple p-4 flex items-center gap-4
-                          hover:shadow-purple-lg transition-all duration-300 group cursor-pointer
-                          ${isUrgent ? 'border-amber-200 hover:border-amber-300' : 'border-purple-border/30 hover:border-purple-primary/40'}`}
-                        >
-                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-all duration-300
-                            ${isUrgent ? 'bg-amber-50' : 'bg-purple-secondary/60 border border-purple-border/20 group-hover:bg-purple-gradient group-hover:shadow-purple-sm'}`}
-                          >
-                            <Clock className={`w-4 h-4 ${isUrgent ? 'text-amber-500' : 'text-purple-primary group-hover:text-white'}`} />
-                          </div>
-                          <div className='flex-1 min-w-0'>
-                            <p className='text-sm font-bold text-purple-foreground truncate group-hover:text-purple-primary transition-colors'>
-                              {req.title}
-                            </p>
-                            {daysLeft !== null && (
-                              <p className={`text-[11px] font-bold mt-0.5 ${isUrgent ? 'text-amber-600' : 'text-purple-muted-foreground/70'}`}>
-                                {daysLeft <= 0 ? 'Overdue!' : `${daysLeft}d left`}
-                              </p>
-                            )}
-                          </div>
-                          <ArrowRight className='w-4 h-4 text-purple-border/50 group-hover:text-purple-primary group-hover:translate-x-0.5 transition-all' />
+                    <Link key={req.id} href={`/forms/${req.id}`}>
+                      <div className={`bg-white/60 hover:bg-white rounded-xl border p-3 flex items-center gap-3 transition-all duration-200 group ${isUrgent ? 'border-student-warning/30 shadow-sm' : 'border-white shadow-sm'}`}>
+                        <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${isUrgent ? 'bg-student-warning/15' : 'bg-student-secondary/20'}`}>
+                          <Clock className={`w-4 h-4 ${isUrgent ? 'text-student-warning' : 'text-student-primary'}`} />
                         </div>
-                      </Link>
-                    </motion.div>
+                        <div className='flex-1 min-w-0'>
+                          <p className='text-[13px] font-bold text-slate-900 truncate group-hover:text-indigo-600 transition-colors'>{req.title}</p>
+                          {daysLeft !== null && (
+                            <p className={`text-[10px] font-bold mt-0.5 ${isUrgent ? 'text-amber-600' : 'text-slate-500'}`}>
+                              {daysLeft <= 0 ? 'Overdue!' : `${daysLeft} days left`}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </Link>
                   );
-                })}
-              </div>
-            ) : (
-              <div className='bg-white rounded-2xl border border-purple-border/20 p-8 text-center space-y-2'>
-                <CheckCircle2 className='w-8 h-8 text-emerald-400 mx-auto' />
-                <p className='text-sm font-bold text-purple-muted-foreground'>All clear!</p>
-                <p className='text-xs text-purple-muted-foreground/60'>No pending forms right now.</p>
-              </div>
-            )}
-          </motion.section>
+                })
+              ) : (
+                <div className='py-6 text-center'>
+                  <CheckCircle2 className='w-6 h-6 text-student-primary/50 mx-auto mb-2' />
+                  <p className='text-xs font-bold text-student-muted-foreground'>All clear!</p>
+                </div>
+              )}
+            </div>
+          </motion.div>
 
-          {/* Academic Grades — only shown if data exists */}
+          {/* Academic Grades */}
           {initialData.subjects.length > 0 && (
-            <motion.section custom={4} variants={fadeUp} initial='hidden' animate='show' className='space-y-4'>
-              <div className='flex items-center justify-between'>
-                <h2 className='text-base font-heading font-black text-purple-foreground flex items-center gap-2'>
-                  <TrendingUp className='w-5 h-5 text-purple-primary' />
-                  Academic Grades
+            <motion.div
+              custom={3}
+              variants={fadeUp}
+              initial='hidden'
+              animate='show'
+              className='bento-card p-6 flex flex-col'
+            >
+              <div className='flex items-center justify-between mb-5'>
+                <h2 className='text-[15px] font-heading font-black text-slate-900 flex items-center gap-2'>
+                  <TrendingUp className='w-4 h-4 text-indigo-600' />
+                  Saving goals
                 </h2>
-                <span className='text-[10px] bg-purple-secondary px-2.5 py-0.5 rounded-full text-purple-primary font-black uppercase tracking-widest border border-purple-border/30'>
-                  Term 1
+                <span className='text-[9px] bg-white border border-slate-200 px-2 py-0.5 rounded-md text-indigo-600 font-black uppercase tracking-widest'>
+                  This Year
                 </span>
               </div>
 
-              <div className='bg-white rounded-2xl border border-purple-border/30 shadow-purple p-5 space-y-4'>
-                {initialData.subjects.map((s, i) => {
+              <div className='flex flex-col gap-4'>
+                {initialData.subjects.slice(0, 3).map((s, i) => {
                   const pct = Math.round((s.score / s.max) * 100);
-                  const barColor = pct >= 90 ? 'bg-emerald-500' : pct >= 75 ? 'bg-purple-primary' : 'bg-amber-400';
+                  const barColor = pct >= 90 ? 'bg-indigo-600' : pct >= 75 ? 'bg-violet-500' : 'bg-indigo-300';
                   return (
-                    <motion.div
-                      key={s.name}
-                      initial={{ opacity: 0, x: -8 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.5 + i * 0.07 }}
-                      className='space-y-1.5'
-                    >
-                      <div className='flex items-center justify-between'>
-                        <span className='text-[12px] font-bold text-purple-foreground'>{s.name}</span>
-                        <span className='text-[12px] font-black text-purple-primary'>
-                          {s.score}<span className='text-purple-muted-foreground/40 font-bold'>/{s.max}</span>
-                        </span>
+                    <div key={s.name} className='space-y-1.5'>
+                      <div className='flex items-center justify-between mb-1'>
+                        <span className='text-[12px] font-bold text-slate-900'>{s.name}</span>
+                        <span className='text-[12px] font-black text-indigo-600'>${s.score * 10}</span>
                       </div>
-                      <div className='h-2 bg-purple-secondary/50 rounded-full overflow-hidden'>
+                      <div className='h-5 bg-indigo-50 rounded-full overflow-hidden relative'>
                         <motion.div
                           initial={{ width: 0 }}
                           animate={{ width: `${pct}%` }}
-                          transition={{ delay: 0.6 + i * 0.07, duration: 0.8, ease: [0.34, 1.56, 0.64, 1] }}
-                          className={`h-full rounded-full ${barColor}`}
-                        />
+                          transition={{ delay: 0.5 + i * 0.1, duration: 0.8, ease: [0.34, 1.56, 0.64, 1] }}
+                          className={`h-full rounded-full ${barColor} flex items-center px-3`}
+                        >
+                           <span className="text-[10px] font-black text-white">{pct}%</span>
+                        </motion.div>
                       </div>
-                    </motion.div>
+                    </div>
                   );
                 })}
               </div>
-            </motion.section>
+            </motion.div>
           )}
+
         </div>
       </div>
     </div>

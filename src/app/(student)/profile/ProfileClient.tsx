@@ -63,15 +63,15 @@ function InfoRow({
 }) {
   if (!value) return null;
   return (
-    <div className='flex items-start gap-4 py-4 border-b border-purple-border/10 last:border-b-0'>
-      <div className='w-9 h-9 rounded-xl bg-purple-primary/8 flex items-center justify-center shrink-0 mt-0.5'>
-        <Icon className='w-4 h-4 text-purple-primary/60' />
+    <div className='flex items-start gap-4 py-4 border-b border-student-border/10 last:border-b-0'>
+      <div className='w-9 h-9 rounded-xl bg-indigo-50 flex items-center justify-center shrink-0 mt-0.5'>
+        <Icon className='w-4 h-4 text-indigo-600' />
       </div>
       <div className='flex-1 min-w-0'>
-        <p className='text-[10px] font-black text-purple-muted-foreground uppercase tracking-[0.2em] mb-1'>
+        <p className='text-[10px] font-black text-student-muted-foreground uppercase tracking-[0.2em] mb-1'>
           {label}
         </p>
-        <p className='text-sm font-semibold text-purple-foreground wrap-break-words'>
+        <p className='text-sm font-semibold text-student-foreground wrap-break-words'>
           {value}
         </p>
       </div>
@@ -82,15 +82,15 @@ function InfoRow({
 function TagList({ items, label }: { items?: string[]; label: string }) {
   if (!items || items.length === 0) return null;
   return (
-    <div className='py-4 border-b border-purple-border/10 last:border-b-0'>
-      <p className='text-[10px] font-black text-purple-muted-foreground uppercase tracking-[0.2em] mb-3'>
+    <div className='py-4 border-b border-student-border/10 last:border-b-0'>
+      <p className='text-[10px] font-black text-student-muted-foreground uppercase tracking-[0.2em] mb-3'>
         {label}
       </p>
       <div className='flex flex-wrap gap-2'>
         {items.map((item, i) => (
           <span
             key={i}
-            className='px-3 py-1.5 rounded-full bg-purple-primary/8 text-[11px] font-bold text-purple-primary border border-purple-primary/10'
+            className='px-3 py-1.5 rounded-full bg-indigo-50 text-[11px] font-bold text-indigo-700 border border-indigo-100'
           >
             {item}
           </span>
@@ -109,99 +109,41 @@ export default function ProfileClient({ profile }: ProfileProps) {
     .toUpperCase();
 
   return (
-    <div className='p-8 lg:p-12 space-y-10 max-w-5xl mx-auto pb-20'>
+    <div className='p-4 lg:p-8 space-y-8 max-w-[1400px] mx-auto pb-24'>
       {/* ── Breadcrumb ──────────────────────────────────────── */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className='space-y-4'
-      >
-        <div className='flex items-center gap-2'>
-          <span className='text-[10px] font-black text-purple-primary uppercase tracking-widest'>
-            Dashboard
-          </span>
-          <ChevronRight className='w-3 h-3 text-purple-muted-foreground/50' />
-          <span className='text-[10px] font-black text-purple-muted-foreground uppercase tracking-widest'>
-            Profile
+      {/* ── Page Header ─────────────────────────────────────── */}
+      <div className="mb-8 flex flex-col sm:flex-row sm:items-center gap-6">
+        <div className='w-24 h-24 rounded-full bg-indigo-100 flex items-center justify-center border-4 border-white shadow-sm shrink-0'>
+          <span className='text-indigo-600 font-heading font-black text-3xl'>
+            {initials}
           </span>
         </div>
-      </motion.div>
-
-      {/* ── Profile Hero ──────────────────────────────────────── */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
-      >
-        <div className='relative overflow-hidden rounded-5xl bg-purple-gradient shadow-purple-lg p-10'>
-          <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 pointer-events-none" />
-
-          <div className='relative z-10 flex flex-col sm:flex-row items-start sm:items-center gap-8'>
-            <div className='w-24 h-24 rounded-3xl bg-white/20 backdrop-blur-md border-2 border-white/30 flex items-center justify-center shadow-xl'>
-              <span className='text-white font-heading font-black text-3xl'>
-                {initials}
-              </span>
-            </div>
-            <div className='flex-1 space-y-2'>
-              <h1 className='text-3xl md:text-4xl font-heading font-black text-white leading-tight'>
-                {profile.name}
-              </h1>
-              <p className='text-white/70 text-sm font-medium'>
-                {profile.email}
-              </p>
-              <div className='flex flex-wrap items-center gap-3 mt-3'>
-                {profile.studentType && (
-                  <span className='px-3 py-1 rounded-full bg-white/20 text-[10px] font-black text-white uppercase tracking-widest border border-white/10'>
-                    {profile.studentType}
-                  </span>
-                )}
-                {profile.classLevel && (
-                  <span className='px-3 py-1 rounded-full bg-white/20 text-[10px] font-black text-white uppercase tracking-widest border border-white/10'>
-                    Class {profile.classLevel}
-                  </span>
-                )}
-                {profile.stream && (
-                  <span className='px-3 py-1 rounded-full bg-white/20 text-[10px] font-black text-white uppercase tracking-widest border border-white/10'>
-                    {profile.stream}
-                  </span>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Identity footer */}
-          <div className='relative z-10 flex flex-wrap items-center gap-3 mt-8 pt-6 border-t border-white/15'>
+        <div className='flex-1'>
+          <h1 className="text-3xl md:text-4xl font-heading font-black text-slate-900 tracking-tight leading-tight">
+            {profile.name}
+          </h1>
+          <p className="text-sm text-slate-500 font-medium mt-1">
+            {profile.email} {profile.studentType && `• ${profile.studentType}`} {profile.classLevel && `• Class ${profile.classLevel}`}
+          </p>
+          <div className='flex flex-wrap items-center gap-2 mt-3'>
             {profile.institution && (
-              <div className='flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-xl px-3 py-2 border border-white/10'>
-                <School className='w-3.5 h-3.5 text-white/70 shrink-0' />
-                <span className='text-[11px] font-bold text-white/80'>
-                  {profile.institution}
-                </span>
-              </div>
+              <span className='px-3 py-1 rounded-full bg-slate-50 text-[10px] font-bold text-slate-600 uppercase tracking-widest border border-slate-200 flex items-center gap-1.5'>
+                <School className='w-3 h-3 text-slate-400' /> {profile.institution}
+              </span>
             )}
-            {profile.mobileNo && (
-              <div className='flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-xl px-3 py-2 border border-white/10'>
-                <Phone className='w-3.5 h-3.5 text-white/70 shrink-0' />
-                <span className='text-[11px] font-bold text-white/80'>
-                  {profile.mobileNo}
-                </span>
-              </div>
+            {profile.stream && (
+              <span className='px-3 py-1 rounded-full bg-slate-50 text-[10px] font-bold text-slate-600 uppercase tracking-widest border border-slate-200 flex items-center gap-1.5'>
+                <Target className='w-3 h-3 text-slate-400' /> {profile.stream}
+              </span>
             )}
             {profile.createdAt && (
-              <div className='flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-xl px-3 py-2 border border-white/10'>
-                <Calendar className='w-3.5 h-3.5 text-white/70 shrink-0' />
-                <span className='text-[11px] font-bold text-white/80'>
-                  Member since{' '}
-                  {new Date(profile.createdAt).toLocaleDateString('en-US', {
-                    month: 'long',
-                    year: 'numeric',
-                  })}
-                </span>
-              </div>
+              <span className='px-3 py-1 rounded-full bg-slate-50 text-[10px] font-bold text-slate-600 uppercase tracking-widest border border-slate-200 flex items-center gap-1.5'>
+                <Calendar className='w-3 h-3 text-slate-400' /> Member since {new Date(profile.createdAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+              </span>
             )}
           </div>
         </div>
-      </motion.div>
+      </div>
 
       {/* ── Profile Sections ─────────────────────────────────── */}
       <div className='grid grid-cols-1 lg:grid-cols-2 gap-8'>
@@ -211,12 +153,12 @@ export default function ProfileClient({ profile }: ProfileProps) {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
         >
-          <div className='bg-white rounded-5xl border border-purple-border/30 shadow-purple p-8'>
-            <div className='flex items-center gap-3 mb-6 pb-4 border-b border-purple-border/20'>
-              <div className='w-10 h-10 rounded-2xl bg-purple-primary/10 flex items-center justify-center'>
-                <User className='w-5 h-5 text-purple-primary' />
+          <div className='bento-card p-8'>
+            <div className='flex items-center gap-3 mb-6 pb-4 border-b border-student-border/20'>
+              <div className='w-10 h-10 rounded-2xl bg-indigo-100 flex items-center justify-center shadow-sm'>
+                <User className='w-5 h-5 text-indigo-600' />
               </div>
-              <h2 className='font-heading font-black text-purple-foreground'>
+              <h2 className='font-heading font-black text-student-foreground'>
                 Personal Information
               </h2>
             </div>
@@ -265,12 +207,12 @@ export default function ProfileClient({ profile }: ProfileProps) {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
         >
-          <div className='bg-white rounded-5xl border border-purple-border/30 shadow-purple p-8'>
-            <div className='flex items-center gap-3 mb-6 pb-4 border-b border-purple-border/20'>
-              <div className='w-10 h-10 rounded-2xl bg-purple-primary/10 flex items-center justify-center'>
-                <GraduationCap className='w-5 h-5 text-purple-primary' />
+          <div className='bento-card p-8'>
+            <div className='flex items-center gap-3 mb-6 pb-4 border-b border-student-border/20'>
+              <div className='w-10 h-10 rounded-2xl bg-indigo-100 flex items-center justify-center shadow-sm'>
+                <GraduationCap className='w-5 h-5 text-indigo-600' />
               </div>
-              <h2 className='font-heading font-black text-purple-foreground'>
+              <h2 className='font-heading font-black text-student-foreground'>
                 Academic Details
               </h2>
             </div>
@@ -310,12 +252,12 @@ export default function ProfileClient({ profile }: ProfileProps) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
           >
-            <div className='bg-white rounded-5xl border border-purple-border/30 shadow-purple p-8'>
-              <div className='flex items-center gap-3 mb-6 pb-4 border-b border-purple-border/20'>
-                <div className='w-10 h-10 rounded-2xl bg-purple-primary/10 flex items-center justify-center'>
-                  <User className='w-5 h-5 text-purple-primary' />
+            <div className='bento-card p-8'>
+              <div className='flex items-center gap-3 mb-6 pb-4 border-b border-student-border/20'>
+                <div className='w-10 h-10 rounded-2xl bg-indigo-100 flex items-center justify-center shadow-sm'>
+                  <User className='w-5 h-5 text-indigo-600' />
                 </div>
-                <h2 className='font-heading font-black text-purple-foreground'>
+                <h2 className='font-heading font-black text-student-foreground'>
                   Parent / Guardian
                 </h2>
               </div>
@@ -383,12 +325,12 @@ export default function ProfileClient({ profile }: ProfileProps) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5 }}
           >
-            <div className='bg-white rounded-5xl border border-purple-border/30 shadow-purple p-8'>
-              <div className='flex items-center gap-3 mb-6 pb-4 border-b border-purple-border/20'>
-                <div className='w-10 h-10 rounded-2xl bg-purple-primary/10 flex items-center justify-center'>
-                  <Target className='w-5 h-5 text-purple-primary' />
+            <div className='bento-card p-8'>
+              <div className='flex items-center gap-3 mb-6 pb-4 border-b border-student-border/20'>
+                <div className='w-10 h-10 rounded-2xl bg-indigo-100 flex items-center justify-center shadow-sm'>
+                  <Target className='w-5 h-5 text-indigo-600' />
                 </div>
-                <h2 className='font-heading font-black text-purple-foreground'>
+                <h2 className='font-heading font-black text-student-foreground'>
                   Targets & Aspirations
                 </h2>
               </div>

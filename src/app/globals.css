@@ -57,6 +57,23 @@
   --color-purple-input: var(--purple-input);
   --color-purple-ring: var(--purple-ring);
 
+  /* Student Theme Colors (Shades of Green) */
+  --color-student-background: var(--student-background);
+  --color-student-foreground: var(--student-foreground);
+  --color-student-primary: var(--student-primary);
+  --color-student-primary-foreground: var(--student-primary-foreground);
+  --color-student-secondary: var(--student-secondary);
+  --color-student-secondary-foreground: var(--student-secondary-foreground);
+  --color-student-muted: var(--student-muted);
+  --color-student-muted-foreground: var(--student-muted-foreground);
+  --color-student-accent: var(--student-accent);
+  --color-student-accent-foreground: var(--student-accent-foreground);
+  --color-student-border: var(--student-border);
+  --color-student-input: var(--student-input);
+  --color-student-ring: var(--student-ring);
+  --color-student-warning: var(--student-warning);
+  --color-student-danger: var(--student-danger);
+
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -159,6 +176,37 @@
     oklch(0.75 0.15 300)
   );
   --glow-purple: oklch(0.6 0.18 280 / 0.25);
+
+  /* Student Theme (Boutique Firm — Indigo, Violet, Teal) */
+  --student-background: #F8FAFC;
+  --student-foreground: #0F172A;
+
+  --student-primary: #4F46E5;
+  --student-primary-foreground: #FFFFFF;
+
+  --student-secondary: #7C3AED;
+  --student-secondary-foreground: #FFFFFF;
+
+  --student-muted: #F8FAFC;
+  --student-muted-foreground: #64748B;
+
+  --student-accent: #E0E7FF;
+  --student-accent-foreground: #4338CA;
+
+  --student-warning: #D97706;
+  --student-danger: #E11D48;
+
+  --student-border: #E2E8F0;
+  --student-input: #E2E8F0;
+  --student-ring: #4F46E5;
+
+  /* Student Design Extras */
+  --student-gradient: linear-gradient(
+    135deg,
+    #4F46E5,
+    #7C3AED
+  );
+  --glow-student: rgba(79, 70, 229, 0.25);
 }
 
 /* ─── Dark Mode ─────────────────────────────────────────────── */
@@ -663,5 +711,153 @@
   .scrollbar-thin::-webkit-scrollbar-thumb {
     background: oklch(0.92 0.02 285);
     border-radius: 9999px;
+  }
+
+  /* ── Student Core Utilities (Shades of Green) ──────── */
+  .bg-student-gradient {
+    background: var(--student-gradient);
+  }
+
+  .text-student-primary {
+    color: var(--student-primary);
+  }
+
+  .border-student {
+    border-color: var(--student-border);
+  }
+
+  /* ── Student Shadow Scale (Emerald Forest) ────────── */
+  .shadow-student-xs {
+    box-shadow: 0 1px 4px oklch(0.52 0.18 155 / 0.08);
+  }
+
+  .shadow-student-sm {
+    box-shadow:
+      0 2px 8px oklch(0.52 0.18 155 / 0.1),
+      0 1px 3px rgba(0, 0, 0, 0.03);
+  }
+
+  .shadow-student {
+    box-shadow:
+      0 4px 20px oklch(0.52 0.18 155 / 0.1),
+      0 1px 3px rgba(0, 0, 0, 0.04);
+  }
+
+  .shadow-student-md {
+    box-shadow:
+      0 8px 28px oklch(0.52 0.18 155 / 0.14),
+      0 2px 6px rgba(0, 0, 0, 0.05);
+  }
+
+  .shadow-student-lg {
+    box-shadow:
+      0 12px 40px oklch(0.52 0.18 155 / 0.16),
+      0 3px 8px rgba(0, 0, 0, 0.06);
+  }
+
+  .shadow-student-xl {
+    box-shadow:
+      0 20px 60px oklch(0.52 0.18 155 / 0.2),
+      0 4px 12px rgba(0, 0, 0, 0.06);
+  }
+
+  /* ── Student Glass Card (Emerald Forest) ──────────── */
+  .student-glass {
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(12px);
+    border: 1px solid oklch(0.52 0.18 155 / 0.12);
+  }
+
+  /* ── Student Background Mesh (Emerald Forest) ────── */
+  .student-mesh {
+    background-color: oklch(0.98 0.015 155);
+    background-image:
+      radial-gradient(
+        ellipse at 10% 10%,
+        oklch(0.52 0.18 155 / 0.08) 0%,
+        transparent 50%
+      ),
+      radial-gradient(
+        ellipse at 85% 15%,
+        oklch(0.72 0.18 150 / 0.06) 0%,
+        transparent 45%
+      ),
+      radial-gradient(
+        ellipse at 50% 80%,
+        oklch(0.78 0.14 75 / 0.05) 0%,
+        transparent 50%
+      );
+  }
+
+  /* ── Student Glow Button (Emerald Forest) ─────────── */
+  .btn-student-glow {
+    box-shadow:
+      0 4px 18px var(--glow-student),
+      0 1px 4px rgba(0, 0, 0, 0.1);
+    transition:
+      box-shadow 0.25s ease,
+      transform 0.2s ease;
+  }
+  .btn-student-glow:hover {
+    box-shadow:
+      0 8px 30px var(--glow-student),
+      0 2px 6px rgba(0, 0, 0, 0.12);
+    transform: translateY(-1px);
+  }
+
+  /* ── Student Progress Bar Fill (Emerald Forest) ──── */
+  .progress-student-fill {
+    background: linear-gradient(
+      90deg,
+      oklch(0.42 0.18 155),
+      oklch(0.52 0.18 155),
+      oklch(0.72 0.18 150)
+    );
+    border-radius: 9999px;
+    transition: width 1s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  /* ── Animated Hero Gradient (Emerald Forest) ─────── */
+  @keyframes student-hue-shift {
+    0%,
+    100% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+  }
+  .student-hero-gradient {
+    background: linear-gradient(
+      to right,
+      #4F46E5,
+      #7C3AED
+    );
+    background-size: 100% 100%;
+  }
+
+  /* ── Neo-Bento & Aurora Utilities (Student Dashboard) ─────── */
+  .bento-card {
+    background: #FFFFFF;
+    border: 1px solid #F1F5F9;
+    border-radius: calc(var(--radius) * 2.5);
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  }
+
+  .bento-card:hover {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    transform: translateY(-2px) scale(1.005);
+  }
+
+  .aurora-bg {
+    background-color: #F8FAFC;
+  }
+
+  .glass-header {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(226, 232, 240, 0.5);
   }
 }
