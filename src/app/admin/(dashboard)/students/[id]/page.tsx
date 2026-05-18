@@ -179,7 +179,7 @@ export default async function StudentProfilePage({
     completionPct === 100
       ? 'oklch(0.50 0.17 145)'
       : completionPct >= 60
-        ? 'var(--color-purple-600, oklch(0.60 0.18 280))'
+        ? 'var(--purple-primary)'
         : 'oklch(0.72 0.18 55)';
 
   return (

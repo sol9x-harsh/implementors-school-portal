@@ -8,6 +8,7 @@ import {
   Phone, Mail, Loader2, Search, ChevronRight, X 
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { ConfirmDialog } from '@/components/admin/ConfirmDialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -31,6 +32,7 @@ export default function SchoolsClient({ initialSchools }: { initialSchools: Scho
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
 
   // Form state
   const [name, setName] = useState('');
@@ -62,8 +64,14 @@ export default function SchoolsClient({ initialSchools }: { initialSchools: Scho
     setIsModalOpen(true);
   };
 
-  const handleDelete = async (id: string) => {
-    if (!window.confirm('Are you sure you want to delete this school?')) return;
+  const handleDelete = (id: string) => {
+    setPendingDeleteId(id);
+  };
+
+  const confirmDelete = async () => {
+    if (!pendingDeleteId) return;
+    const id = pendingDeleteId;
+    setPendingDeleteId(null);
     try {
       const res = await deleteSchool(id);
       if (res.success) {
@@ -315,6 +323,15 @@ export default function SchoolsClient({ initialSchools }: { initialSchools: Scho
           </form>
         </DialogContent>
       </Dialog>
+
+      <ConfirmDialog
+        open={pendingDeleteId !== null}
+        title='Delete school?'
+        description='This will permanently remove the school and all associated records. This action cannot be undone.'
+        confirmLabel='Delete'
+        onConfirm={confirmDelete}
+        onCancel={() => setPendingDeleteId(null)}
+      />
     </div>
   );
 }

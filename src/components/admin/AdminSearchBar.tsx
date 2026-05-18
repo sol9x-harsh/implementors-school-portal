@@ -37,14 +37,16 @@ export function AdminSearchBar() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search students..."
+          aria-label="Search students"
           className="w-full h-9 bg-white border border-purple-border/30 rounded-xl py-1 pl-9 pr-8 text-[13px] font-medium
-            focus:outline-none focus:ring-2 focus:ring-purple-primary/10 focus:border-purple-primary/40
+            focus:outline-none focus:ring-2 focus:ring-purple-primary/40 focus:border-purple-primary/60
             placeholder:text-purple-muted-foreground/40 transition-all duration-150 shadow-purple-xs group-hover:border-purple-border/60"
         />
         {query && (
           <button
             type="button"
             onClick={handleClear}
+            aria-label="Clear search"
             className="absolute right-2.5 top-1/2 -translate-y-1/2 text-purple-muted-foreground/30 hover:text-purple-primary transition-colors"
           >
             <X className="w-3.5 h-3.5" />

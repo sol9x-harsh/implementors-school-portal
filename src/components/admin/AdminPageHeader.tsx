@@ -43,7 +43,7 @@ export function AdminPageHeader({
         {/* Title row */}
         <h1 className='text-3xl font-heading font-black text-purple-foreground flex items-center gap-3'>
           {title}
-          <Icon className='w-6 h-6 text-purple-primary/35' />
+          <Icon className='w-6 h-6 text-purple-primary/35' aria-hidden='true' />
         </h1>
 
         {/* Subtitle */}
@@ -57,7 +57,7 @@ export function AdminPageHeader({
           initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.35, ease: 'easeOut', delay: 0.05 }}
-          className='flex items-center gap-3 shrink-0'
+          className='flex flex-wrap items-center gap-3'
         >
           {actions}
         </motion.div>

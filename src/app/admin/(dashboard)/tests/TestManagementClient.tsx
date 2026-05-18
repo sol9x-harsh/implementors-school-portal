@@ -208,6 +208,7 @@ export default function TestManagementClient({
         transition={{ delay: 0.08 }}
         className='admin-card overflow-hidden'
       >
+        <div className='overflow-x-auto scrollbar-thin'>
         <Table>
           <TableHeader>
             <TableRow className='hover:bg-transparent border-b border-purple-border/30 bg-[oklch(0.975_0.006_285)]'>
@@ -352,10 +353,11 @@ export default function TestManagementClient({
             )}
           </TableBody>
         </Table>
+        </div>
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className='flex items-center justify-between px-5 py-3 border-t border-purple-border/25 bg-[oklch(0.975_0.006_285)]/60'>
+          <div className='flex items-center justify-between px-5 py-3 border-t border-purple-border/25 bg-purple-background/60'>
             <p className='text-[11px] font-medium text-purple-muted-foreground/60 tabular-nums'>
               Page {currentPage} of {totalPages} · {filteredTests.length} tests
             </p>

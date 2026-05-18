@@ -239,6 +239,34 @@
   --sidebar-ring: oklch(0.68 0.18 265);
   --glow-primary: oklch(0.68 0.18 265 / 0.3);
   --glow-amber: oklch(0.78 0.16 75 / 0.2);
+
+  /* Purple Theme — Dark overrides */
+  --purple-background: oklch(0.14 0.015 285);
+  --purple-foreground: oklch(0.93 0.01 285);
+
+  --purple-primary: oklch(0.72 0.16 280);
+  --purple-primary-foreground: oklch(0.14 0.015 280);
+
+  --purple-secondary: oklch(0.2 0.02 285);
+  --purple-secondary-foreground: oklch(0.88 0.02 285);
+
+  --purple-muted: oklch(0.18 0.015 285);
+  --purple-muted-foreground: oklch(0.62 0.04 285);
+
+  --purple-accent: oklch(0.22 0.04 295);
+  --purple-accent-foreground: oklch(0.85 0.08 295);
+
+  --purple-border: oklch(0.26 0.02 285);
+  --purple-input: oklch(0.26 0.02 285);
+  --purple-ring: oklch(0.72 0.16 280);
+
+  --purple-gradient: linear-gradient(
+    135deg,
+    oklch(0.5 0.2 280),
+    oklch(0.62 0.18 290),
+    oklch(0.72 0.15 300)
+  );
+  --glow-purple: oklch(0.72 0.16 280 / 0.3);
 }
 
 /* ─── Base Layer ────────────────────────────────────────────── */
@@ -648,6 +676,101 @@
     background: var(--purple-gradient);
     border-radius: calc(var(--radius) * 2.4) calc(var(--radius) * 2.4) 0 0;
     margin: -1.5rem -1.5rem 1.5rem -1.5rem;
+  }
+
+  /* ── Canonical admin primitives ────────────────────────────── */
+
+  /* Standardised primary CTA — h-10, rounded-xl */
+  .admin-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    height: 2.5rem;
+    padding: 0 1rem;
+    border-radius: 0.75rem;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    transition: background-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+    cursor: pointer;
+  }
+
+  .admin-button-primary {
+    background: var(--purple-gradient);
+    color: oklch(0.98 0.01 280);
+    box-shadow: 0 2px 8px oklch(0.6 0.18 280 / 0.2);
+  }
+
+  .admin-button-primary:hover {
+    box-shadow: 0 4px 16px oklch(0.6 0.18 280 / 0.3);
+    transform: translateY(-1px);
+  }
+
+  .admin-button-ghost {
+    background: transparent;
+    color: var(--purple-muted-foreground);
+    border: 1px solid oklch(0.92 0.02 285 / 0.4);
+  }
+
+  .admin-button-ghost:hover {
+    background: oklch(0.94 0.04 285 / 0.4);
+    color: var(--purple-foreground);
+  }
+
+  /* Standardised form input — h-10, rounded-xl */
+  .admin-input {
+    height: 2.5rem;
+    width: 100%;
+    border-radius: 0.75rem;
+    border: 1px solid oklch(0.92 0.02 285 / 0.4);
+    background: oklch(0.94 0.04 285 / 0.2);
+    padding: 0 0.875rem;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--purple-foreground);
+    transition: border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
+    outline: none;
+  }
+
+  .admin-input::placeholder {
+    color: oklch(0.55 0.06 285 / 0.45);
+  }
+
+  .admin-input:focus {
+    border-color: oklch(0.6 0.18 280 / 0.5);
+    background: white;
+    box-shadow: 0 0 0 3px oklch(0.6 0.18 280 / 0.12);
+  }
+
+  /* Standardised empty state */
+  .admin-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    padding: 4rem 2rem;
+    text-align: center;
+  }
+
+  .admin-empty-state-icon {
+    width: 3rem;
+    height: 3rem;
+    color: oklch(0.6 0.18 280 / 0.25);
+  }
+
+  .admin-empty-state-title {
+    font-size: 0.9375rem;
+    font-weight: 700;
+    color: var(--purple-foreground);
+  }
+
+  .admin-empty-state-desc {
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: oklch(0.55 0.06 285 / 0.7);
+    max-width: 24rem;
   }
 
   /* ── Glass card ─────────────────────────────────────── */

@@ -75,7 +75,10 @@ export function AdminFilterBar({
           >
             <SelectValue placeholder={f.placeholder} />
           </SelectTrigger>
-          <SelectContent className='rounded-xl border-purple-border/30 shadow-purple-sm'>
+          <SelectContent
+            className='rounded-xl border-purple-border/30 shadow-purple-sm'
+            style={{ width: 'auto', minWidth: 'var(--anchor-width)' }}
+          >
             {f.options.map((opt) => (
               <SelectItem
                 key={opt.value}
@@ -89,8 +92,8 @@ export function AdminFilterBar({
         </Select>
       ))}
 
-      {/* Spacer */}
-      <div className='flex-1' />
+      {/* Spacer — only expands in row layout; hidden in column layout */}
+      <div className='hidden sm:block flex-1' />
 
       {/* Result count pill */}
       {resultCount !== undefined && totalCount !== undefined && (

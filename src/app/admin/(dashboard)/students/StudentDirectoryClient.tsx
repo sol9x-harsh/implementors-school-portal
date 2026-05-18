@@ -424,7 +424,16 @@ export default function StudentDirectoryClient({
                   onClick={() =>
                     router.push(`/admin/students/${row.original.id}`)
                   }
-                  className={`admin-table-row group cursor-pointer border-b border-purple-border/15 ${idx % 2 === 1 ? 'bg-[oklch(0.975_0.006_285)]/50' : 'bg-white'}`}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      router.push(`/admin/students/${row.original.id}`);
+                    }
+                  }}
+                  tabIndex={0}
+                  role='link'
+                  aria-label={`View student ${row.original.name ?? ''}`}
+                  className={`admin-table-row group cursor-pointer border-b border-purple-border/15 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-purple-primary/40 ${idx % 2 === 1 ? 'bg-purple-background/50' : 'bg-white'}`}
                 >
                   {row.getVisibleCells().map((cell: any) => (
                     <TableCell key={cell.id} className='py-3 px-5'>
@@ -756,6 +765,7 @@ export default function StudentDirectoryClient({
                       name='name'
                       placeholder='John Doe'
                       required
+                      aria-required='true'
                       className='h-9 rounded-lg border-purple-border/35 bg-purple-secondary/15 focus:bg-white focus:border-purple-primary text-sm'
                     />
                   </div>

@@ -9,6 +9,7 @@ import {
 } from '@/components/admin/AdminNavClient';
 import { AdminSignOutButton } from '@/components/admin/AdminSignOutButton';
 import { AdminSearchBar } from '@/components/admin/AdminSearchBar';
+import { AdminMobileNav } from '@/components/admin/AdminMobileNav';
 
 export default async function AdminLayout({
   children,
@@ -57,7 +58,7 @@ export default async function AdminLayout({
   const roleLabel = (session.user.role ?? '').replace('_', ' ');
 
   return (
-    <div className='admin-theme flex min-h-screen bg-[oklch(0.975_0.006_285)] font-sans'>
+    <div className='admin-theme flex min-h-screen bg-purple-background font-sans'>
       {/* ── Sidebar ─────────────────────────────────────────────── */}
       <aside className='hidden lg:flex w-[240px] shrink-0 flex-col sticky top-0 h-screen z-30 overflow-hidden bg-white border-r border-purple-border/30'>
         {/* ── Brand ─────────────────────────────────────────────── */}
@@ -111,15 +112,26 @@ export default async function AdminLayout({
       {/* ── Content Column ─────────────────────────────────────── */}
       <div className='flex-1 flex flex-col min-w-0'>
         {/* ── Top Bar ───────────────────────────────────────────── */}
-        <header className='sticky top-0 z-20 bg-[oklch(0.975_0.006_285)]/90 backdrop-blur-md border-b border-purple-border/30 h-16 flex items-center gap-4 px-8'>
+        <header className='sticky top-0 z-20 bg-purple-background/90 backdrop-blur-md border-b border-purple-border/30 h-16 flex items-center gap-4 px-4 lg:px-8'>
+          {/* Mobile hamburger — hidden on lg+ */}
+          <AdminMobileNav
+            sections={navSections}
+            initials={initials}
+            name={name}
+            roleLabel={roleLabel}
+          />
+
           {/* Search trigger */}
           <AdminSearchBar />
 
           <div className='ml-auto flex items-center gap-1.5'>
             {/* Notification bell */}
-            <button className='relative w-8 h-8 rounded-lg hover:bg-white hover:shadow-purple-xs flex items-center justify-center transition-all duration-150 group'>
+            <button
+              aria-label='Notifications'
+              className='relative w-8 h-8 rounded-lg hover:bg-white hover:shadow-purple-xs flex items-center justify-center transition-all duration-150 group'
+            >
               <Bell className='w-4 h-4 text-purple-foreground/60 group-hover:text-purple-primary transition-colors' />
-              <span className='absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-rose-500 rounded-full border border-[oklch(0.975_0.006_285)] pulse-dot' />
+              <span className='absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-rose-500 rounded-full border-2 border-purple-background pulse-dot' />
             </button>
 
             {/* Separator */}

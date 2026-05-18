@@ -186,7 +186,7 @@ export default function AdminLoginPage() {
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.95 }}
-                    className='flex items-center gap-3 p-4 rounded-2xl bg-red-50 border border-red-100 text-red-700 text-xs font-bold'
+                    className='flex items-center gap-3 p-4 rounded-2xl bg-purple-primary/8 border border-purple-primary/20 text-purple-foreground text-xs font-bold'
                   >
                     <AlertCircle className='w-4 h-4 shrink-0' />
                     {error}

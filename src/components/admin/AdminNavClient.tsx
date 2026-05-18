@@ -57,11 +57,11 @@ export function AdminNavClient({ sections }: Props) {
                   <motion.div
                     whileHover={{ x: isActive ? 0 : 2 }}
                     transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-                    className={`relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] transition-all duration-200 group
+                    className={`relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] transition-all duration-200 group border-l-4
                       ${
                         isActive
-                          ? 'text-purple-primary bg-purple-primary/8 font-bold border-l-4 border-purple-primary'
-                          : 'text-purple-muted-foreground/75 hover:text-purple-foreground hover:bg-purple-secondary/40 font-medium'
+                          ? 'text-purple-primary bg-purple-primary/8 font-bold border-purple-primary'
+                          : 'text-purple-muted-foreground/75 hover:text-purple-foreground hover:bg-purple-secondary/40 font-medium border-transparent'
                       }`}
                   >
                     {/* Icon */}
