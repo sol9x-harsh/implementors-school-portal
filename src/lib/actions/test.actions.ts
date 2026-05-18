@@ -3,14 +3,17 @@
 import dbConnect from "@/lib/db/mongodb";
 import AcademicTest from "@/lib/models/AcademicTest";
 import { revalidatePath } from "next/cache";
+import { requireAdmin } from "./admin.actions";
 
 export async function createAcademicTest(formData: FormData) {
+  await requireAdmin();
   await dbConnect();
 
   const name = formData.get("name") as string;
   const date = formData.get("date") as string;
   const targetClass = formData.get("targetClass") as string;
   const targetStream = formData.get("targetStream") as string;
+  const targetSchool = formData.get("targetSchool") as string;
 
   if (!name || !date) {
     return { success: false, error: "Name and Date are required" };
@@ -22,6 +25,7 @@ export async function createAcademicTest(formData: FormData) {
       date: new Date(date),
       targetClass: targetClass || undefined,
       targetStream: targetStream || undefined,
+      targetSchool: targetSchool || undefined,
     });
 
     revalidatePath("/admin/tests");
@@ -32,6 +36,7 @@ export async function createAcademicTest(formData: FormData) {
 }
 
 export async function getAcademicTests() {
+  await requireAdmin();
   await dbConnect();
   try {
     const tests = await AcademicTest.find().sort({ date: -1 });

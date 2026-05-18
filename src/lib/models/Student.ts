@@ -1,24 +1,17 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
 
-export interface IUser extends Document {
-  // Base Identity & Auth (REQUIRED)
+export interface IStudent extends Document {
   name: string;
   email: string;
   password?: string;
-  role: 'STUDENT' | 'ADMIN' | 'SUPER_ADMIN';
   mobileNo: string;
   institution?: string;
-  studentType?: 'SCHOOL' | 'COLLEGE' | 'ADMIN';
-
-  // Academic Details (Student-only)
+  uid?: string;
   classLevel?: string;
-  subjects?: string[];
   stream?: string;
-  college?: string;
-  course?: string;
-  year?: string;
-
-  // Parent Details (Student-only)
+  subjects?: string[];
+  
+  // Parent Details
   fatherName?: string;
   fatherOccupation?: string;
   fatherMobile?: string;
@@ -28,8 +21,7 @@ export interface IUser extends Document {
   motherMobile?: string;
   motherEmail?: string;
 
-  // Targets & Social (OPTIONAL)
-  linkedInId?: string;
+  // Targets
   targetedExams?: string[];
   targetedInstitutions?: string[];
   targetedCountries?: string[];
@@ -40,34 +32,18 @@ export interface IUser extends Document {
   updatedAt: Date;
 }
 
-const UserSchema: Schema = new Schema(
+const StudentSchema: Schema = new Schema(
   {
-    // Base Identity & Auth
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true, select: false },
-    role: { 
-      type: String, 
-      enum: ['STUDENT', 'ADMIN', 'SUPER_ADMIN'], 
-      default: 'STUDENT',
-      required: true 
-    },
     mobileNo: { type: String, required: true },
     institution: { type: String },
-    studentType: { 
-      type: String, 
-      enum: ['SCHOOL', 'COLLEGE', 'ADMIN'],
-    },
-
-    // Academic Details (optional for admin users)
+    uid: { type: String, unique: true, sparse: true },
     classLevel: { type: String },
-    subjects: { type: [String] },
     stream: { type: String },
-    college: { type: String },
-    course: { type: String },
-    year: { type: String },
+    subjects: [{ type: String }],
 
-    // Parent Details (optional for admin users)
     fatherName: { type: String },
     fatherOccupation: { type: String },
     fatherMobile: { type: String },
@@ -77,8 +53,6 @@ const UserSchema: Schema = new Schema(
     motherMobile: { type: String },
     motherEmail: { type: String },
 
-    // Targets & Social (OPTIONAL)
-    linkedInId: { type: String },
     targetedExams: [{ type: String }],
     targetedInstitutions: [{ type: String }],
     targetedCountries: [{ type: String }],
@@ -88,7 +62,6 @@ const UserSchema: Schema = new Schema(
   { timestamps: true }
 );
 
-// Prevent mongoose from recompiling the model upon hot reload
-const User: Model<IUser> = mongoose.models.User || mongoose.model<IUser>('User', UserSchema);
+const Student: Model<IStudent> = mongoose.models.Student || mongoose.model<IStudent>('Student', StudentSchema);
 
-export default User;
+export default Student;

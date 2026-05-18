@@ -9,7 +9,7 @@ export interface IInternalGrade extends Document {
 
 const InternalGradeSchema: Schema = new Schema(
   {
-    studentId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    studentId: { type: Schema.Types.ObjectId, ref: 'Student', required: true },
     term: {
       type: String,
       enum: ['Term 1', 'Term 2', 'Final'],

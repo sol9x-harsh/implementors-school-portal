@@ -17,8 +17,6 @@ import {
   TrendingUp,
   Sparkles,
   BookOpenCheck,
-  Leaf,
-  TreePine,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -63,13 +61,13 @@ export default function LoginPage() {
 
   return (
     <div className='flex min-h-screen bg-student-background selection:bg-student-primary/30'>
-      {/* ── Left Panel: Emerald Forest Branding ──────────── */}
+      {/* ── Left Panel: Student Branding ──────────── */}
       <div className='hidden lg:flex lg:w-[45%] relative overflow-hidden flex-col justify-between p-16 bg-student-foreground'>
         {/* Decorative background elements */}
         <div className='absolute inset-0 student-hero-gradient opacity-90' />
         <div className='absolute -top-24 -right-24 w-96 h-96 rounded-full bg-student-secondary/20 blur-[100px]' />
         <div className='absolute -bottom-24 -left-24 w-80 h-80 rounded-full bg-student-warning/10 blur-[80px]' />
-        {/* Organic leaf pattern overlay */}
+        {/* Subtle dot pattern overlay */}
         <div className='absolute inset-0 leaf-pattern opacity-[0.06] pointer-events-none' />
         {/* Floating decorative elements */}
         <div className='absolute top-1/4 right-12 w-3 h-3 rounded-full bg-student-secondary/40 float-up' />
@@ -112,7 +110,7 @@ export default function LoginPage() {
             transition={{ duration: 0.7, delay: 0.2 }}
           >
             <div className='inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/15 text-student-accent text-[10px] font-black uppercase tracking-widest mb-6 backdrop-blur-sm'>
-              <TreePine className='w-3 h-3' />
+              <Sparkles className='w-3 h-3' />
               Grow · Learn · Achieve
             </div>
             <h1 className='text-6xl font-heading font-black text-white leading-[0.9] tracking-tighter uppercase'>
@@ -204,7 +202,7 @@ export default function LoginPage() {
           {/* Heading */}
           <div className='mb-10 text-center lg:text-left'>
             <div className='inline-flex items-center gap-2 px-3 py-1 rounded-full bg-student-primary/10 text-student-primary text-[10px] font-black uppercase tracking-widest mb-4 border border-student-primary/15'>
-              <Leaf className='w-3 h-3' />
+              <GraduationCap className='w-3 h-3' />
               Student Access
             </div>
             <h2 className='text-4xl font-heading font-black text-student-foreground tracking-tighter uppercase'>

@@ -57,7 +57,7 @@ export function AdminFilterBar({
       {filters.length > 0 && (
         <div className='hidden sm:flex items-center gap-1.5 shrink-0 text-purple-muted-foreground/50'>
           <SlidersHorizontal className='w-3 h-3' />
-          <span className='text-[9px] font-black uppercase tracking-widest'>
+          <span className='text-[9px] font-bold uppercase tracking-[0.12em]'>
             Filter
           </span>
         </div>
@@ -71,7 +71,7 @@ export function AdminFilterBar({
           onValueChange={(v) => v && f.onChange(v)}
         >
           <SelectTrigger
-            className={`h-9 rounded-xl border-purple-border/30 bg-purple-secondary/15 text-[11px] font-black uppercase tracking-wider shrink-0 ${f.width ?? 'w-[140px]'}`}
+            className={`h-9 rounded-xl border-purple-border/30 bg-purple-secondary/15 text-[11px] font-bold uppercase tracking-[0.08em] shrink-0 ${f.width ?? 'w-[140px]'}`}
           >
             <SelectValue placeholder={f.placeholder} />
           </SelectTrigger>
@@ -94,7 +94,7 @@ export function AdminFilterBar({
 
       {/* Result count pill */}
       {resultCount !== undefined && totalCount !== undefined && (
-        <span className='text-[10px] font-black text-purple-muted-foreground/70 uppercase tracking-widest shrink-0 bg-purple-secondary/40 px-3 py-1 rounded-full'>
+        <span className='text-[10px] font-bold text-purple-muted-foreground/60 uppercase tracking-[0.12em] shrink-0 bg-purple-secondary/40 px-3 py-1.5 rounded-full'>
           {resultCount} of {totalCount}
         </span>
       )}

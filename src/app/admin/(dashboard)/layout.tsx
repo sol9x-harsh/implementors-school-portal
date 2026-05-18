@@ -17,10 +17,7 @@ export default async function AdminLayout({
 }) {
   const session = await getServerSession(authOptions);
 
-  if (
-    !session ||
-    (session.user.role !== 'ADMIN' && session.user.role !== 'SUPER_ADMIN')
-  ) {
+  if (!session || session.user.role !== 'ADMIN') {
     redirect('/admin/login');
   }
 
@@ -43,7 +40,7 @@ export default async function AdminLayout({
     {
       label: 'Tools',
       items: [
-        { name: 'Dynamic Forms', href: '/admin/forms' },
+        // { name: 'Dynamic Forms', href: '/admin/forms' },
         { name: 'Annual Portfolios', href: '/admin/reports' },
       ],
     },
@@ -114,7 +111,7 @@ export default async function AdminLayout({
       {/* ── Content Column ─────────────────────────────────────── */}
       <div className='flex-1 flex flex-col min-w-0'>
         {/* ── Top Bar ───────────────────────────────────────────── */}
-        <header className='sticky top-0 z-20 bg-[oklch(0.975_0.006_285)]/90 backdrop-blur-md border-b border-purple-border/30 h-12 flex items-center gap-3 px-6'>
+        <header className='sticky top-0 z-20 bg-[oklch(0.975_0.006_285)]/90 backdrop-blur-md border-b border-purple-border/30 h-16 flex items-center gap-4 px-8'>
           {/* Search trigger */}
           <AdminSearchBar />
 
@@ -129,17 +126,17 @@ export default async function AdminLayout({
             <div className='w-px h-5 bg-purple-border/40 mx-0.5' />
 
             {/* User chip */}
-            <div className='flex items-center gap-2 pl-1'>
-              <div className='w-7 h-7 rounded-lg bg-purple-gradient flex items-center justify-center'>
-                <span className='text-white text-[10px] font-heading font-black'>
+            <div className='flex items-center gap-3 pl-1'>
+              <div className='w-8 h-8 rounded-xl bg-purple-gradient flex items-center justify-center shadow-purple-xs'>
+                <span className='text-white text-[11px] font-heading font-black'>
                   {initials}
                 </span>
               </div>
               <div className='hidden sm:block'>
-                <p className='text-[11px] font-bold text-purple-foreground leading-none'>
+                <p className='text-[12px] font-bold text-purple-foreground leading-none'>
                   {name.split(' ')[0]}
                 </p>
-                <p className='text-[9px] text-purple-muted-foreground font-bold mt-0.5 uppercase tracking-wider'>
+                <p className='text-[10px] text-purple-muted-foreground font-bold mt-0.5 uppercase tracking-wider'>
                   {roleLabel}
                 </p>
               </div>

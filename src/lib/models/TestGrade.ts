@@ -10,7 +10,7 @@ export interface ITestGrade extends Document {
 const TestGradeSchema: Schema = new Schema(
   {
     testId: { type: Schema.Types.ObjectId, ref: 'AcademicTest', required: true },
-    studentId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    studentId: { type: Schema.Types.ObjectId, ref: 'Student', required: true },
     marks: { type: Schema.Types.Mixed, required: true },
     remarks: { type: String },
   },

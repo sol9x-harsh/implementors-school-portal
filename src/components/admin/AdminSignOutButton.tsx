@@ -11,8 +11,8 @@ export function AdminSignOutButton() {
     <>
       <button
         onClick={() => setShowDialog(true)}
-        className="flex items-center justify-center gap-2.5 px-4 py-3 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em]
-          transition-all duration-300 w-full text-rose-500 bg-rose-50/50 hover:bg-rose-50 hover:text-rose-600 border border-rose-100/50"
+        className="flex items-center justify-center gap-2.5 px-4 py-3 rounded-2xl text-[11px] font-bold uppercase tracking-[0.12em]
+          transition-all duration-300 w-full text-rose-500 bg-rose-50/50 hover:bg-rose-50 hover:text-rose-600 border border-rose-100 shadow-sm"
       >
         <LogOut className="w-4 h-4 shrink-0" />
         Sign Out

@@ -4,22 +4,24 @@ import dbConnect from '@/lib/db/mongodb';
 import Event from '@/lib/models/Event';
 import DataRequest from '@/lib/models/DataRequest';
 import DataSubmission from '@/lib/models/DataSubmission';
-import User from '@/lib/models/User';
+import Admin from '@/lib/models/Admin';
+import Student from '@/lib/models/Student';
 import InternalGrade from '@/lib/models/InternalGrade';
 import EventRegistration from '@/lib/models/EventRegistration';
 import AcademicTest from '@/lib/models/AcademicTest';
+import AnnualReport, { IAnnualReport } from '@/lib/models/AnnualReport';
+import { COHORT_OPTIONS } from '@/lib/constants/cohorts';
 import { revalidatePath } from 'next/cache';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
+import { emailService } from '@/lib/email/service';
 
 // --- AUTH HELPER ---
-async function requireAdmin() {
+export async function requireAdmin() {
   const session = await getServerSession(authOptions);
-  if (
-    !session ||
-    (session.user.role !== 'ADMIN' && session.user.role !== 'SUPER_ADMIN')
-  ) {
+  if (!session || session.user.role !== 'ADMIN') {
     throw new Error('Unauthorized: Admin access required');
   }
   return session;
@@ -30,27 +32,90 @@ export async function getAdminDashboardStats() {
   await requireAdmin();
   await dbConnect();
 
-  const totalStudents = await User.countDocuments({ role: 'STUDENT' });
-  const publishedEvents = await Event.countDocuments();
-  const activeRequests = await DataRequest.countDocuments({
-    deadline: { $gte: new Date() },
-  });
+  const now = new Date();
 
-  // For charts
+  // Month boundaries
+  const startOfThisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+
+  // ── Core KPI counts ────────────────────────────────────────
+  const [
+    totalStudents,
+    studentsThisMonth,
+    studentsLastMonth,
+    publishedEvents,
+    upcomingEvents,
+    activeRequests,
+    expiringRequests,
+  ] = await Promise.all([
+    Student.countDocuments(),
+    Student.countDocuments({ createdAt: { $gte: startOfThisMonth } }),
+    Student.countDocuments({
+      createdAt: { $gte: startOfLastMonth, $lt: startOfThisMonth },
+    }),
+    Event.countDocuments(),
+    Event.countDocuments({ eventDate: { $gte: now } }),
+    DataRequest.countDocuments({ deadline: { $gte: now } }),
+    DataRequest.countDocuments({
+      deadline: {
+        $gte: now,
+        $lte: new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000),
+      },
+    }),
+  ]);
+
+  // Stream-level breakdown
+  const streamAgg = await Student.aggregate([
+    { $match: { stream: { $exists: true, $ne: '' } } },
+    { $group: { _id: '$stream', value: { $sum: 1 } } },
+    { $sort: { value: -1 } },
+    { $limit: 6 },
+  ]);
+
+  // Build bar chart data: top streams
   const genderData = [
-    {
-      name: 'Male',
-      value: await User.countDocuments({ role: 'STUDENT' }),
-      color: 'oklch(0.60 0.18 280)',
-    }, // Placeholder for actual gender field if added
-    { name: 'Female', value: 0, color: 'oklch(0.75 0.15 300)' },
+    ...streamAgg.map((s: any, i: number) => ({
+      name: s._id,
+      value: s.value,
+      color:
+        i === 0
+          ? 'var(--purple-primary)'
+          : `oklch(${0.65 + i * 0.04} 0.14 ${270 + i * 15})`,
+    })),
   ];
+
+  // ── Delta strings (real data) ──────────────────────────────
+  const studentDelta =
+    studentsThisMonth > 0
+      ? `+${studentsThisMonth} this month`
+      : studentsLastMonth > 0
+        ? `${studentsLastMonth} last month`
+        : 'No new this month';
+
+  const studentUp =
+    studentsThisMonth > 0 || studentsLastMonth === 0 ? true : false;
+
+  const eventDelta =
+    upcomingEvents > 0 ? `${upcomingEvents} upcoming` : 'No upcoming events';
+
+  const requestDelta =
+    expiringRequests > 0
+      ? `${expiringRequests} expiring soon`
+      : activeRequests > 0
+        ? `${activeRequests} active`
+        : 'None open';
 
   return {
     totalStudents,
     publishedEvents,
     activeRequests,
     genderData,
+    // Real deltas
+    studentDelta,
+    studentUp,
+    eventDelta,
+    upcomingEvents,
+    requestDelta,
   };
 }
 
@@ -95,16 +160,25 @@ export async function createEvent(formData: FormData) {
   const cohort = formData.get('cohort') as string;
 
   // Map to stored audience format: 'all' for global, or specific cohort ID
-  const targetAudience = (audienceType === 'global' || !cohort) ? ['all'] : [cohort];
+  const targetAudience =
+    audienceType === 'global' || !cohort ? ['all'] : [cohort];
 
   // Linked resources (JSON strings from client)
   const linkedTestsRaw = formData.get('linkedTests') as string;
   const linkedActivitiesRaw = formData.get('linkedActivities') as string;
-  const linkedExternalEventsRaw = formData.get('linkedExternalEvents') as string;
+  const linkedExternalEventsRaw = formData.get(
+    'linkedExternalEvents',
+  ) as string;
 
-  const linkedTests: string[] = linkedTestsRaw ? JSON.parse(linkedTestsRaw) : [];
-  const linkedActivities: any[] = linkedActivitiesRaw ? JSON.parse(linkedActivitiesRaw) : [];
-  const linkedExternalEvents: any[] = linkedExternalEventsRaw ? JSON.parse(linkedExternalEventsRaw) : [];
+  const linkedTests: string[] = linkedTestsRaw
+    ? JSON.parse(linkedTestsRaw)
+    : [];
+  const linkedActivities: any[] = linkedActivitiesRaw
+    ? JSON.parse(linkedActivitiesRaw)
+    : [];
+  const linkedExternalEvents: any[] = linkedExternalEventsRaw
+    ? JSON.parse(linkedExternalEventsRaw)
+    : [];
 
   const newEvent = await Event.create({
     title,
@@ -135,7 +209,7 @@ export async function getEvents() {
   await dbConnect();
 
   const events = await Event.find().sort({ createdAt: -1 });
-  return events.map(e => ({
+  return events.map((e) => ({
     id: e._id.toString(),
     title: e.title,
     description: e.description,
@@ -176,7 +250,7 @@ export async function deleteEvent(id: string) {
   await dbConnect();
 
   await Event.findByIdAndDelete(id);
-  
+
   revalidatePath('/admin/events');
   revalidatePath('/activities');
   return { success: true };
@@ -249,12 +323,16 @@ export async function createStudent(formData: FormData) {
   const email = formData.get('email') as string;
   const mobileNo = formData.get('mobileNo') as string;
   const institution = formData.get('institution') as string;
-  const studentType = formData.get('studentType') as string;
   const classLevel = formData.get('classLevel') as string;
   const stream = formData.get('stream') as string;
-  const college = formData.get('college') as string;
-  const course = formData.get('course') as string;
-  const year = formData.get('year') as string;
+  const fatherName = formData.get('fatherName') as string;
+  const fatherOccupation = formData.get('fatherOccupation') as string;
+  const fatherMobile = formData.get('fatherMobile') as string;
+  const fatherEmail = formData.get('fatherEmail') as string;
+  const motherName = formData.get('motherName') as string;
+  const motherOccupation = formData.get('motherOccupation') as string;
+  const motherMobile = formData.get('motherMobile') as string;
+  const motherEmail = formData.get('motherEmail') as string;
 
   if (!name || !email || !mobileNo) {
     return {
@@ -263,34 +341,47 @@ export async function createStudent(formData: FormData) {
     };
   }
 
-  // Check for duplicate email
-  const existing = await User.findOne({ email });
-  if (existing) {
+  // Check for duplicate email (in both collections for global uniqueness)
+  const existingStudent = await Student.findOne({ email });
+  const existingAdmin = await Admin.findOne({ email });
+  if (existingStudent || existingAdmin) {
     return {
       success: false,
-      error: 'A student with this email already exists.',
+      error: 'A user with this email already exists.',
     };
   }
 
   // Generate a default password
-  const defaultPassword = `Sol9x@${Math.random().toString(36).slice(2, 8)}`;
+  const defaultPassword = `Sol9x@${crypto.randomBytes(4).toString('base64url')}`;
   const hashedPassword = await bcrypt.hash(defaultPassword, 12);
 
   try {
-    const student = await User.create({
+    const student = await Student.create({
       name,
       email,
       password: hashedPassword,
-      role: 'STUDENT',
       mobileNo,
       institution: institution || undefined,
-      studentType: studentType || undefined,
       classLevel: classLevel || undefined,
       stream: stream || undefined,
-      college: college || undefined,
-      course: course || undefined,
-      year: year || undefined,
+      uid: `SOL9X-${crypto.randomBytes(4).toString('hex').toUpperCase()}`,
+      fatherName: fatherName || undefined,
+      fatherOccupation: fatherOccupation || undefined,
+      fatherMobile: fatherMobile || undefined,
+      fatherEmail: fatherEmail || undefined,
+      motherName: motherName || undefined,
+      motherOccupation: motherOccupation || undefined,
+      motherMobile: motherMobile || undefined,
+      motherEmail: motherEmail || undefined,
     });
+
+    // Send welcome email
+    try {
+      await emailService.sendWelcomeEmail(email, name, defaultPassword);
+    } catch (emailError) {
+      console.error('Failed to send welcome email:', emailError);
+      // Don't fail the student creation if email fails
+    }
 
     revalidatePath('/admin/students');
     return {
@@ -313,12 +404,8 @@ export async function bulkCreateStudents(
     email: string;
     mobileNo: string;
     institution?: string;
-    studentType?: string;
     classLevel?: string;
     stream?: string;
-    college?: string;
-    course?: string;
-    year?: string;
   }[],
 ) {
   await requireAdmin();
@@ -327,6 +414,16 @@ export async function bulkCreateStudents(
   let created = 0;
   let skipped = 0;
   const errors: string[] = [];
+  const credentials: Array<{
+    name: string;
+    email: string;
+    password: string;
+    uid: string;
+    mobileNo: string;
+    institution?: string;
+    classLevel?: string;
+    stream?: string;
+  }> = [];
 
   for (const row of students) {
     if (!row.name || !row.email || !row.mobileNo) {
@@ -337,31 +434,55 @@ export async function bulkCreateStudents(
       continue;
     }
 
-    const existing = await User.findOne({ email: row.email });
+    const existing = await Student.findOne({ email: row.email });
     if (existing) {
       skipped++;
       errors.push(`Skipped: Duplicate email "${row.email}"`);
       continue;
     }
 
-    const defaultPassword = `Sol9x@${Math.random().toString(36).slice(2, 8)}`;
+    const defaultPassword = `Sol9x@${crypto.randomBytes(4).toString('base64url')}`;
     const hashedPassword = await bcrypt.hash(defaultPassword, 12);
+    const uid = `SOL9X-${crypto.randomBytes(4).toString('hex').toUpperCase()}`;
 
     try {
-      await User.create({
+      const student = await Student.create({
         name: row.name,
         email: row.email,
         password: hashedPassword,
-        role: 'STUDENT',
         mobileNo: row.mobileNo,
         institution: row.institution || undefined,
-        studentType: row.studentType || undefined,
         classLevel: row.classLevel || undefined,
         stream: row.stream || undefined,
-        college: row.college || undefined,
-        course: row.course || undefined,
-        year: row.year || undefined,
+        uid,
       });
+
+      credentials.push({
+        name: row.name,
+        email: row.email,
+        password: defaultPassword,
+        uid,
+        mobileNo: row.mobileNo,
+        institution: row.institution,
+        classLevel: row.classLevel,
+        stream: row.stream,
+      });
+
+      // Send welcome email
+      try {
+        await emailService.sendWelcomeEmail(
+          row.email,
+          row.name,
+          defaultPassword,
+        );
+      } catch (emailError) {
+        console.error(
+          `Failed to send welcome email to ${row.email}:`,
+          emailError,
+        );
+        // Don't fail the student creation if email fails
+      }
+
       created++;
     } catch {
       skipped++;
@@ -370,7 +491,7 @@ export async function bulkCreateStudents(
   }
 
   revalidatePath('/admin/students');
-  return { success: true, created, skipped, errors };
+  return { success: true, created, skipped, errors, credentials };
 }
 
 // --- STUDENT DIRECTORY ---
@@ -378,7 +499,7 @@ export async function getStudentsDirectory() {
   await requireAdmin();
   await dbConnect();
 
-  const students = await User.find({ role: 'STUDENT' }).sort({ createdAt: -1 });
+  const students = await Student.find().sort({ createdAt: -1 });
 
   return students.map((s) => ({
     id: s._id.toString(),
@@ -386,12 +507,9 @@ export async function getStudentsDirectory() {
     email: s.email,
     mobileNo: s.mobileNo,
     institution: s.institution,
-    studentType: s.studentType,
+    uid: s.uid,
     classLevel: s.classLevel,
     stream: s.stream,
-    college: s.college,
-    course: s.course,
-    year: s.year,
     createdAt: s.createdAt?.toISOString(),
   }));
 }
@@ -418,14 +536,13 @@ export async function getCohortCounts() {
   await dbConnect();
 
   const [class12, class12pcm, class11, total] = await Promise.all([
-    User.countDocuments({ role: 'STUDENT', classLevel: '12' }),
-    User.countDocuments({
-      role: 'STUDENT',
+    Student.countDocuments({ classLevel: '12' }),
+    Student.countDocuments({
       classLevel: '12',
       stream: { $regex: /pcm|physics|science/i },
     }),
-    User.countDocuments({ role: 'STUDENT', classLevel: '11' }),
-    User.countDocuments({ role: 'STUDENT' }),
+    Student.countDocuments({ classLevel: '11' }),
+    Student.countDocuments(),
   ]);
 
   return { class12, class12pcm, class11, total };
@@ -434,7 +551,7 @@ export async function getCohortCounts() {
 export async function getStudentById(id: string) {
   await requireAdmin();
   await dbConnect();
-  const student = await User.findById(id);
+  const student = await Student.findById(id);
   if (!student) return null;
 
   return {
@@ -442,15 +559,11 @@ export async function getStudentById(id: string) {
     name: student.name,
     email: student.email,
     mobileNo: student.mobileNo,
-    role: student.role,
     institution: student.institution,
-    studentType: student.studentType,
+    uid: student.uid,
     classLevel: student.classLevel,
     subjects: student.subjects,
     stream: student.stream,
-    college: student.college,
-    course: student.course,
-    year: student.year,
     fatherName: student.fatherName,
     fatherOccupation: student.fatherOccupation,
     fatherMobile: student.fatherMobile,
@@ -464,7 +577,108 @@ export async function getStudentById(id: string) {
     targetedCountries: student.targetedCountries,
     targetedCourses: student.targetedCourses,
     otherTargets: student.otherTargets,
-    linkedInId: student.linkedInId,
     createdAt: student.createdAt?.toISOString(),
   };
+}
+
+// --- ANNUAL REPORTS ---
+
+function buildCohortQuery(cohortValue: string): Record<string, unknown> {
+  if (cohortValue === 'all') return {};
+
+  const parts = cohortValue.split(':');
+  const query: Record<string, unknown> = {};
+
+  // parts[1] is classLevel (e.g. "12"), parts[2] is stream key
+  if (parts[1]) query.classLevel = parts[1];
+
+  if (parts[2]) {
+    switch (parts[2]) {
+      case 'pcm':
+        query.stream = { $regex: /Science \(PCM\)/i };
+        break;
+      case 'pcb':
+        query.stream = { $regex: /Science \(PCB\)/i };
+        break;
+      case 'pcmb':
+        query.stream = { $regex: /Science \(PCMB\)/i };
+        break;
+      case 'commerce_math':
+        query.stream = { $regex: /Commerce \(With Maths\)/i };
+        break;
+      case 'commerce_no_math':
+        query.stream = { $regex: /Commerce \(Without Maths\)/i };
+        break;
+      case 'humanities':
+        query.stream = { $regex: /Humanities/i };
+        break;
+    }
+  }
+
+  return query;
+}
+
+export async function getCohortOptionsWithCounts() {
+  await requireAdmin();
+  await dbConnect();
+
+  const results = await Promise.all(
+    COHORT_OPTIONS.map(async (opt) => {
+      const count = await Student.countDocuments(buildCohortQuery(opt.value));
+      return { value: opt.value, label: opt.label, count };
+    })
+  );
+
+  return results;
+}
+
+export async function generateAnnualReport(cohortValue: string) {
+  const session = await requireAdmin();
+  await dbConnect();
+
+  const cohortOption = COHORT_OPTIONS.find((o) => o.value === cohortValue);
+  if (!cohortOption) throw new Error('Invalid cohort value');
+
+  const studentCount = await Student.countDocuments(buildCohortQuery(cohortValue));
+
+  const report = (await AnnualReport.create({
+    cohortValue,
+    cohortLabel: cohortOption.label,
+    studentCount,
+    generatedAt: new Date(),
+    status: 'complete',
+    generatedBy: session.user.email ?? undefined,
+  })) as IAnnualReport;
+
+  revalidatePath('/admin/reports');
+
+  return {
+    success: true,
+    report: {
+      id: (report._id as { toString(): string }).toString(),
+      cohortValue: report.cohortValue,
+      cohortLabel: report.cohortLabel,
+      studentCount: report.studentCount,
+      generatedAt: report.generatedAt.toISOString(),
+      status: report.status as 'complete' | 'failed',
+      generatedBy: report.generatedBy,
+    },
+  };
+}
+
+export async function getAnnualReports() {
+  await requireAdmin();
+  await dbConnect();
+
+  const reports = await AnnualReport.find().sort({ generatedAt: -1 }).limit(100);
+
+  return reports.map((r) => ({
+    id: (r._id as { toString(): string }).toString(),
+    cohortValue: r.cohortValue,
+    cohortLabel: r.cohortLabel,
+    studentCount: r.studentCount,
+    generatedAt: r.generatedAt.toISOString(),
+    status: r.status as 'complete' | 'failed',
+    generatedBy: r.generatedBy,
+  }));
 }

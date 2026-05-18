@@ -10,7 +10,7 @@ export interface IEventRegistration extends Document {
 
 const EventRegistrationSchema: Schema = new Schema(
   {
-    studentId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    studentId: { type: Schema.Types.ObjectId, ref: 'Student', required: true },
     eventId: { type: Schema.Types.ObjectId, ref: 'Event', required: true },
     status: {
       type: String,

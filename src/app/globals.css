@@ -57,7 +57,7 @@
   --color-purple-input: var(--purple-input);
   --color-purple-ring: var(--purple-ring);
 
-  /* Student Theme Colors (Shades of Green) */
+  /* Student Theme Colors (Indigo + Violet) */
   --color-student-background: var(--student-background);
   --color-student-foreground: var(--student-foreground);
   --color-student-primary: var(--student-primary);
@@ -84,29 +84,29 @@
   --radius-5xl: calc(var(--radius) * 4);
 }
 
-/* ─── Light Mode (Growth Theme) ────────────────────────────── */
+/* ─── Light Mode (Neutral Base) ────────────────────────────── */
 :root {
-  /* Backgrounds — soft ivory-green */
-  --background: oklch(0.985 0.008 145);
-  --foreground: oklch(0.18 0.04 160);
+  /* Backgrounds — soft neutral */
+  --background: oklch(0.985 0.002 260);
+  --foreground: oklch(0.18 0.02 260);
 
   /* Cards / Popovers */
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.18 0.04 160);
+  --card-foreground: oklch(0.18 0.02 260);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.18 0.04 160);
+  --popover-foreground: oklch(0.18 0.02 260);
 
-  /* Primary — Emerald Green (growth) */
-  --primary: oklch(0.52 0.17 155);
-  --primary-foreground: oklch(0.98 0.01 145);
+  /* Primary — Indigo (neutral base for both themes) */
+  --primary: oklch(0.55 0.2 265);
+  --primary-foreground: oklch(0.98 0.01 265);
 
   /* Secondary */
-  --secondary: oklch(0.94 0.04 148);
-  --secondary-foreground: oklch(0.3 0.08 155);
+  --secondary: oklch(0.94 0.02 265);
+  --secondary-foreground: oklch(0.3 0.08 265);
 
   /* Muted */
-  --muted: oklch(0.955 0.015 148);
-  --muted-foreground: oklch(0.52 0.04 155);
+  --muted: oklch(0.955 0.01 265);
+  --muted-foreground: oklch(0.52 0.03 265);
 
   /* Accent — warm amber glow */
   --accent: oklch(0.93 0.06 85);
@@ -116,13 +116,13 @@
   --destructive: oklch(0.577 0.245 27.325);
 
   /* Borders / Inputs */
-  --border: oklch(0.9 0.025 148);
-  --input: oklch(0.9 0.025 148);
-  --ring: oklch(0.52 0.17 155);
+  --border: oklch(0.9 0.01 265);
+  --input: oklch(0.9 0.01 265);
+  --ring: oklch(0.55 0.2 265);
 
   /* Charts */
-  --chart-1: oklch(0.52 0.17 155);
-  --chart-2: oklch(0.68 0.15 165);
+  --chart-1: oklch(0.55 0.2 265);
+  --chart-2: oklch(0.6 0.18 280);
   --chart-3: oklch(0.75 0.13 85);
   --chart-4: oklch(0.6 0.2 25);
   --chart-5: oklch(0.55 0.15 265);
@@ -131,14 +131,14 @@
   --radius: 0.75rem;
 
   /* Sidebar */
-  --sidebar: oklch(0.975 0.012 148);
-  --sidebar-foreground: oklch(0.22 0.05 155);
-  --sidebar-primary: oklch(0.52 0.17 155);
-  --sidebar-primary-foreground: oklch(0.98 0.01 145);
-  --sidebar-accent: oklch(0.93 0.04 148);
-  --sidebar-accent-foreground: oklch(0.3 0.08 155);
-  --sidebar-border: oklch(0.89 0.03 148);
-  --sidebar-ring: oklch(0.52 0.17 155);
+  --sidebar: oklch(0.975 0.005 265);
+  --sidebar-foreground: oklch(0.22 0.03 265);
+  --sidebar-primary: oklch(0.55 0.2 265);
+  --sidebar-primary-foreground: oklch(0.98 0.01 265);
+  --sidebar-accent: oklch(0.93 0.02 265);
+  --sidebar-accent-foreground: oklch(0.3 0.08 265);
+  --sidebar-border: oklch(0.89 0.01 265);
+  --sidebar-ring: oklch(0.55 0.2 265);
 
   /* Purple Theme (ia Academy Inspired) */
   --purple-background: oklch(0.985 0.008 280);
@@ -160,12 +160,9 @@
   --purple-input: oklch(0.92 0.02 285);
   --purple-ring: oklch(0.6 0.18 280);
 
-  /* Growth Design Extras (Original Green retained for reference) */
-  --growth-gradient-start: oklch(0.52 0.17 155);
-  --growth-gradient-mid: oklch(0.62 0.16 180);
-  --growth-gradient-end: oklch(0.68 0.15 200);
+  /* Design Extras */
   --amber-glow: oklch(0.78 0.16 75);
-  --glow-primary: oklch(0.52 0.17 155 / 0.25);
+  --glow-primary: oklch(0.55 0.2 265 / 0.25);
   --glow-amber: oklch(0.78 0.16 75 / 0.2);
 
   /* Purple Design Extras */
@@ -177,72 +174,70 @@
   );
   --glow-purple: oklch(0.6 0.18 280 / 0.25);
 
-  /* Student Theme (Boutique Firm — Indigo, Violet, Teal) */
-  --student-background: #F8FAFC;
-  --student-foreground: #0F172A;
+  /* Student Theme (Indigo + Violet) */
+  --student-background: #f8fafc;
+  --student-foreground: #0f172a;
 
-  --student-primary: #4F46E5;
-  --student-primary-foreground: #FFFFFF;
+  --student-primary: #4f46e5;
+  --student-primary-foreground: #ffffff;
 
-  --student-secondary: #7C3AED;
-  --student-secondary-foreground: #FFFFFF;
+  --student-secondary: #7c3aed;
+  --student-secondary-foreground: #ffffff;
 
-  --student-muted: #F8FAFC;
-  --student-muted-foreground: #64748B;
+  --student-muted: #f1f5f9;
+  --student-muted-foreground: #64748b;
 
-  --student-accent: #E0E7FF;
-  --student-accent-foreground: #4338CA;
+  --student-accent: #e0e7ff;
+  --student-accent-foreground: #4338ca;
 
-  --student-warning: #D97706;
-  --student-danger: #E11D48;
+  --student-warning: #d97706;
+  --student-danger: #e11d48;
 
-  --student-border: #E2E8F0;
-  --student-input: #E2E8F0;
-  --student-ring: #4F46E5;
+  --student-border: #e2e8f0;
+  --student-input: #e2e8f0;
+  --student-ring: #4f46e5;
 
   /* Student Design Extras */
-  --student-gradient: linear-gradient(
-    135deg,
-    #4F46E5,
-    #7C3AED
-  );
+  --student-gradient: linear-gradient(135deg, #4f46e5, #7c3aed);
   --glow-student: rgba(79, 70, 229, 0.25);
+  --student-card: #ffffff;
+  --student-card-foreground: #0f172a;
 }
 
 /* ─── Dark Mode ─────────────────────────────────────────────── */
 .dark {
-  --background: oklch(0.13 0.02 155);
-  --foreground: oklch(0.96 0.01 145);
-  --card: oklch(0.17 0.025 155);
-  --card-foreground: oklch(0.96 0.01 145);
-  --popover: oklch(0.17 0.025 155);
-  --popover-foreground: oklch(0.96 0.01 145);
-  --primary: oklch(0.68 0.18 155);
-  --primary-foreground: oklch(0.13 0.02 155);
-  --secondary: oklch(0.22 0.03 155);
-  --secondary-foreground: oklch(0.96 0.01 145);
-  --muted: oklch(0.22 0.03 155);
-  --muted-foreground: oklch(0.65 0.04 155);
+  --background: oklch(0.13 0.015 265);
+  --foreground: oklch(0.96 0.01 265);
+  --card: oklch(0.17 0.02 265);
+  --card-foreground: oklch(0.96 0.01 265);
+  --popover: oklch(0.17 0.02 265);
+  --popover-foreground: oklch(0.96 0.01 265);
+  --primary: oklch(0.68 0.18 265);
+  --primary-foreground: oklch(0.13 0.015 265);
+  --secondary: oklch(0.22 0.02 265);
+  --secondary-foreground: oklch(0.96 0.01 265);
+  --muted: oklch(0.22 0.02 265);
+  --muted-foreground: oklch(0.65 0.03 265);
   --accent: oklch(0.28 0.06 85);
   --accent-foreground: oklch(0.9 0.08 85);
   --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(0.25 0.03 155);
-  --input: oklch(0.25 0.03 155);
-  --ring: oklch(0.68 0.18 155);
-  --chart-1: oklch(0.68 0.18 155);
-  --chart-2: oklch(0.72 0.14 165);
+  --border: oklch(0.25 0.02 265);
+  --input: oklch(0.25 0.02 265);
+  --ring: oklch(0.68 0.18 265);
+  --chart-1: oklch(0.68 0.18 265);
+  --chart-2: oklch(0.72 0.14 280);
   --chart-3: oklch(0.78 0.13 85);
   --chart-4: oklch(0.65 0.2 25);
   --chart-5: oklch(0.62 0.15 265);
-  --sidebar: oklch(0.15 0.025 155);
-  --sidebar-foreground: oklch(0.92 0.01 145);
-  --sidebar-primary: oklch(0.68 0.18 155);
-  --sidebar-primary-foreground: oklch(0.13 0.02 155);
-  --sidebar-accent: oklch(0.22 0.03 155);
-  --sidebar-accent-foreground: oklch(0.96 0.01 145);
-  --sidebar-border: oklch(0.25 0.03 155);
-  --sidebar-ring: oklch(0.68 0.18 155);
-  --glow-primary: oklch(0.68 0.18 155 / 0.3);
+  --sidebar: oklch(0.15 0.02 265);
+  --sidebar-foreground: oklch(0.92 0.01 265);
+  --sidebar-primary: oklch(0.68 0.18 265);
+  --sidebar-primary-foreground: oklch(0.13 0.015 265);
+  --sidebar-accent: oklch(0.22 0.02 265);
+  --sidebar-accent-foreground: oklch(0.96 0.01 265);
+  --sidebar-border: oklch(0.25 0.02 265);
+  --sidebar-ring: oklch(0.68 0.18 265);
+  --glow-primary: oklch(0.68 0.18 265 / 0.3);
   --glow-amber: oklch(0.78 0.16 75 / 0.2);
 }
 
@@ -269,13 +264,13 @@
 
 /* ─── Utility Layer ─────────────────────────────────────────── */
 @layer utilities {
-  /* Growth Gradient Text */
+  /* Gradient Text */
   .gradient-text {
     background: linear-gradient(
       135deg,
-      oklch(0.42 0.18 155),
-      oklch(0.58 0.18 175),
-      oklch(0.65 0.16 200)
+      oklch(0.45 0.2 265),
+      oklch(0.6 0.18 280),
+      oklch(0.7 0.15 300)
     );
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -300,7 +295,7 @@
     -webkit-backdrop-filter: blur(16px) saturate(1.8);
     border: 1px solid rgba(255, 255, 255, 0.5);
     box-shadow:
-      0 4px 24px rgba(5, 150, 105, 0.06),
+      0 4px 24px rgba(79, 70, 229, 0.06),
       0 1px 4px rgba(0, 0, 0, 0.04);
   }
 
@@ -312,7 +307,7 @@
 
   .glass-card-hover:hover {
     box-shadow:
-      0 8px 40px rgba(5, 150, 105, 0.12),
+      0 8px 40px rgba(79, 70, 229, 0.12),
       0 2px 8px rgba(0, 0, 0, 0.06);
     transform: translateY(-2px);
   }
@@ -333,13 +328,13 @@
     transform: translateY(-1px);
   }
 
-  /* Growth Background Mesh */
+  /* Background Mesh */
   .growth-mesh {
-    background-color: oklch(0.985 0.008 145);
+    background-color: oklch(0.985 0.002 260);
     background-image:
       radial-gradient(
         ellipse at 10% 10%,
-        oklch(0.52 0.17 155 / 0.08) 0%,
+        oklch(0.55 0.2 265 / 0.08) 0%,
         transparent 50%
       ),
       radial-gradient(
@@ -349,7 +344,7 @@
       ),
       radial-gradient(
         ellipse at 50% 80%,
-        oklch(0.62 0.16 180 / 0.06) 0%,
+        oklch(0.6 0.18 280 / 0.06) 0%,
         transparent 50%
       );
   }
@@ -374,9 +369,9 @@
     pointer-events: none;
   }
 
-  /* Subtle leaf decoration */
+  /* Subtle dot decoration */
   .leaf-pattern {
-    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%2310b981' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%234F46E5' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
   }
 
   /* Upward arrow animation */
@@ -433,11 +428,11 @@
   .nav-active {
     background: linear-gradient(
       135deg,
-      oklch(0.52 0.17 155 / 0.12),
-      oklch(0.62 0.16 175 / 0.08)
+      oklch(0.55 0.2 265 / 0.12),
+      oklch(0.6 0.18 280 / 0.08)
     );
-    border-left: 3px solid oklch(0.52 0.17 155);
-    color: oklch(0.42 0.17 155);
+    border-left: 3px solid oklch(0.55 0.2 265);
+    color: oklch(0.45 0.2 265);
     font-weight: 600;
   }
 
@@ -445,22 +440,22 @@
   .bg-growth-gradient {
     background: linear-gradient(
       135deg,
-      oklch(0.42 0.18 155),
-      oklch(0.55 0.18 170),
-      oklch(0.62 0.16 195)
+      oklch(0.45 0.2 265),
+      oklch(0.55 0.18 280),
+      oklch(0.65 0.15 300)
     );
   }
 
   /* Soft shadow card */
   .shadow-growth {
     box-shadow:
-      0 2px 8px rgba(5, 150, 105, 0.08),
+      0 2px 8px rgba(79, 70, 229, 0.08),
       0 1px 3px rgba(0, 0, 0, 0.04);
   }
 
   .shadow-growth-lg {
     box-shadow:
-      0 8px 32px rgba(5, 150, 105, 0.14),
+      0 8px 32px rgba(79, 70, 229, 0.14),
       0 2px 8px rgba(0, 0, 0, 0.06);
   }
 
@@ -468,8 +463,8 @@
   .progress-fill {
     background: linear-gradient(
       90deg,
-      oklch(0.52 0.17 155),
-      oklch(0.68 0.15 175)
+      oklch(0.55 0.2 265),
+      oklch(0.68 0.15 280)
     );
     border-radius: 9999px;
     transition: width 1s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -570,7 +565,7 @@
     border-color: oklch(0.6 0.18 280 / 0.2);
   }
 
-  .admin-badge-college {
+  .admin-badge-stream {
     background: oklch(0.55 0.15 265 / 0.1);
     color: oklch(0.45 0.18 265);
     border-color: oklch(0.55 0.15 265 / 0.25);
@@ -713,7 +708,7 @@
     border-radius: 9999px;
   }
 
-  /* ── Student Core Utilities (Shades of Green) ──────── */
+  /* ── Student Core Utilities (Indigo + Violet) ──────── */
   .bg-student-gradient {
     background: var(--student-gradient);
   }
@@ -726,70 +721,70 @@
     border-color: var(--student-border);
   }
 
-  /* ── Student Shadow Scale (Emerald Forest) ────────── */
+  /* ── Student Shadow Scale (Indigo) ────────── */
   .shadow-student-xs {
-    box-shadow: 0 1px 4px oklch(0.52 0.18 155 / 0.08);
+    box-shadow: 0 1px 4px rgba(79, 70, 229, 0.08);
   }
 
   .shadow-student-sm {
     box-shadow:
-      0 2px 8px oklch(0.52 0.18 155 / 0.1),
+      0 2px 8px rgba(79, 70, 229, 0.1),
       0 1px 3px rgba(0, 0, 0, 0.03);
   }
 
   .shadow-student {
     box-shadow:
-      0 4px 20px oklch(0.52 0.18 155 / 0.1),
+      0 4px 20px rgba(79, 70, 229, 0.1),
       0 1px 3px rgba(0, 0, 0, 0.04);
   }
 
   .shadow-student-md {
     box-shadow:
-      0 8px 28px oklch(0.52 0.18 155 / 0.14),
+      0 8px 28px rgba(79, 70, 229, 0.14),
       0 2px 6px rgba(0, 0, 0, 0.05);
   }
 
   .shadow-student-lg {
     box-shadow:
-      0 12px 40px oklch(0.52 0.18 155 / 0.16),
+      0 12px 40px rgba(79, 70, 229, 0.16),
       0 3px 8px rgba(0, 0, 0, 0.06);
   }
 
   .shadow-student-xl {
     box-shadow:
-      0 20px 60px oklch(0.52 0.18 155 / 0.2),
+      0 20px 60px rgba(79, 70, 229, 0.2),
       0 4px 12px rgba(0, 0, 0, 0.06);
   }
 
-  /* ── Student Glass Card (Emerald Forest) ──────────── */
+  /* ── Student Glass Card (Indigo) ──────────── */
   .student-glass {
     background: rgba(255, 255, 255, 0.75);
     backdrop-filter: blur(12px);
-    border: 1px solid oklch(0.52 0.18 155 / 0.12);
+    border: 1px solid rgba(79, 70, 229, 0.12);
   }
 
-  /* ── Student Background Mesh (Emerald Forest) ────── */
+  /* ── Student Background Mesh (Indigo) ────── */
   .student-mesh {
-    background-color: oklch(0.98 0.015 155);
+    background-color: #f8fafc;
     background-image:
       radial-gradient(
         ellipse at 10% 10%,
-        oklch(0.52 0.18 155 / 0.08) 0%,
+        rgba(79, 70, 229, 0.08) 0%,
         transparent 50%
       ),
       radial-gradient(
         ellipse at 85% 15%,
-        oklch(0.72 0.18 150 / 0.06) 0%,
+        rgba(124, 58, 237, 0.06) 0%,
         transparent 45%
       ),
       radial-gradient(
         ellipse at 50% 80%,
-        oklch(0.78 0.14 75 / 0.05) 0%,
+        rgba(79, 70, 229, 0.04) 0%,
         transparent 50%
       );
   }
 
-  /* ── Student Glow Button (Emerald Forest) ─────────── */
+  /* ── Student Glow Button (Indigo) ─────────── */
   .btn-student-glow {
     box-shadow:
       0 4px 18px var(--glow-student),
@@ -805,19 +800,14 @@
     transform: translateY(-1px);
   }
 
-  /* ── Student Progress Bar Fill (Emerald Forest) ──── */
+  /* ── Student Progress Bar Fill (Indigo) ──── */
   .progress-student-fill {
-    background: linear-gradient(
-      90deg,
-      oklch(0.42 0.18 155),
-      oklch(0.52 0.18 155),
-      oklch(0.72 0.18 150)
-    );
+    background: linear-gradient(90deg, #4338ca, #4f46e5, #7c3aed);
     border-radius: 9999px;
     transition: width 1s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
 
-  /* ── Animated Hero Gradient (Emerald Forest) ─────── */
+  /* ── Animated Hero Gradient (Indigo) ─────── */
   @keyframes student-hue-shift {
     0%,
     100% {
@@ -828,30 +818,28 @@
     }
   }
   .student-hero-gradient {
-    background: linear-gradient(
-      to right,
-      #4F46E5,
-      #7C3AED
-    );
+    background: linear-gradient(to right, #4f46e5, #7c3aed);
     background-size: 100% 100%;
   }
 
   /* ── Neo-Bento & Aurora Utilities (Student Dashboard) ─────── */
   .bento-card {
-    background: #FFFFFF;
-    border: 1px solid #F1F5F9;
+    background: #ffffff;
+    border: 1px solid #f1f5f9;
     border-radius: calc(var(--radius) * 2.5);
     box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
     transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
   }
 
   .bento-card:hover {
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    box-shadow:
+      0 4px 6px -1px rgba(0, 0, 0, 0.1),
+      0 2px 4px -1px rgba(0, 0, 0, 0.06);
     transform: translateY(-2px) scale(1.005);
   }
 
   .aurora-bg {
-    background-color: #F8FAFC;
+    background-color: #f8fafc;
   }
 
   .glass-header {

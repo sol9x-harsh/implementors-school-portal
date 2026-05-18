@@ -1,6 +1,10 @@
 'use client';
 
+import { useState } from 'react';
 import { motion } from 'framer-motion';
+import { toast } from 'sonner';
+import ProfileEditForm from '@/components/student/ProfileEditForm';
+import { updateStudentProfile } from '@/lib/actions/student.actions';
 import {
   User,
   Mail,
@@ -10,11 +14,17 @@ import {
   Building,
   Target,
   Globe,
-  FileText,
-  ChevronRight,
   Calendar,
   Briefcase,
   School,
+  Edit,
+  X,
+  Sparkles,
+  Users,
+  Trophy,
+  MapPin,
+  Award,
+  Activity,
 } from 'lucide-react';
 
 interface ProfileProps {
@@ -27,9 +37,6 @@ interface ProfileProps {
     studentType?: string;
     classLevel?: string;
     stream?: string;
-    college?: string;
-    course?: string;
-    year?: string;
     subjects?: string[];
     fatherName?: string;
     fatherOccupation?: string;
@@ -52,26 +59,47 @@ interface ProfileProps {
   };
 }
 
-function InfoRow({
+function InfoCard({
   icon: Icon,
   label,
   value,
+  variant = 'default',
 }: {
   icon: any;
   label: string;
   value?: string | null;
+  variant?: 'default' | 'compact';
 }) {
   if (!value) return null;
+
+  if (variant === 'compact') {
+    return (
+      <div className='flex items-center gap-3 p-3 rounded-xl bg-student-muted/30 border border-student-border/10 hover:bg-student-muted/40 transition-colors group'>
+        <div className='w-9 h-9 rounded-lg bg-student-primary/10 flex items-center justify-center shrink-0 group-hover:bg-student-primary/15 transition-colors'>
+          <Icon className='w-4 h-4 text-student-primary' />
+        </div>
+        <div className='flex-1 min-w-0'>
+          <p className='text-[10px] font-black text-student-muted-foreground uppercase tracking-[0.15em] leading-none mb-0.5'>
+            {label}
+          </p>
+          <p className='text-[13px] font-semibold text-student-foreground truncate'>
+            {value}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className='flex items-start gap-4 py-4 border-b border-student-border/10 last:border-b-0'>
-      <div className='w-9 h-9 rounded-xl bg-indigo-50 flex items-center justify-center shrink-0 mt-0.5'>
-        <Icon className='w-4 h-4 text-indigo-600' />
+    <div className='flex items-start gap-4 p-4 rounded-xl bg-white border border-student-border/15 shadow-sm hover:shadow-md hover:border-student-border/25 transition-all group'>
+      <div className='w-10 h-10 rounded-xl bg-student-primary/8 flex items-center justify-center shrink-0 mt-0.5 group-hover:bg-student-primary/12 transition-colors'>
+        <Icon className='w-4.5 h-4.5 text-student-primary' />
       </div>
       <div className='flex-1 min-w-0'>
-        <p className='text-[10px] font-black text-student-muted-foreground uppercase tracking-[0.2em] mb-1'>
+        <p className='text-[9px] font-black text-student-muted-foreground uppercase tracking-[0.2em] mb-1'>
           {label}
         </p>
-        <p className='text-sm font-semibold text-student-foreground wrap-break-words'>
+        <p className='text-[14px] font-semibold text-student-foreground leading-snug'>
           {value}
         </p>
       </div>
@@ -79,10 +107,11 @@ function InfoRow({
   );
 }
 
-function TagList({ items, label }: { items?: string[]; label: string }) {
+function TagCloud({ items, label }: { items?: string[]; label: string }) {
   if (!items || items.length === 0) return null;
+
   return (
-    <div className='py-4 border-b border-student-border/10 last:border-b-0'>
+    <div className='p-4 rounded-xl bg-white border border-student-border/15 shadow-sm'>
       <p className='text-[10px] font-black text-student-muted-foreground uppercase tracking-[0.2em] mb-3'>
         {label}
       </p>
@@ -90,7 +119,7 @@ function TagList({ items, label }: { items?: string[]; label: string }) {
         {items.map((item, i) => (
           <span
             key={i}
-            className='px-3 py-1.5 rounded-full bg-indigo-50 text-[11px] font-bold text-indigo-700 border border-indigo-100'
+            className='px-3 py-1.5 rounded-full bg-student-primary/10 text-[11px] font-bold text-student-primary border border-student-primary/15 hover:bg-student-primary/15 transition-colors'
           >
             {item}
           </span>
@@ -100,7 +129,49 @@ function TagList({ items, label }: { items?: string[]; label: string }) {
   );
 }
 
+function SectionCard({
+  icon: Icon,
+  title,
+  children,
+  delay = 0,
+  badge,
+}: {
+  icon: any;
+  title: string;
+  children: React.ReactNode;
+  delay?: number;
+  badge?: string | number;
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay, duration: 0.5, ease: [0.25, 0.8, 0.25, 1] }}
+      className='space-y-4'
+    >
+      <div className='flex items-center gap-3'>
+        <div className='w-10 h-10 rounded-xl bg-student-gradient flex items-center justify-center shadow-student-sm'>
+          <Icon className='w-5 h-5 text-white' />
+        </div>
+        <div className='flex-1'>
+          <h3 className='font-heading font-black text-lg text-student-foreground tracking-tight'>
+            {title}
+          </h3>
+          {badge && (
+            <p className='text-[10px] text-student-muted-foreground font-medium mt-0.5'>
+              {badge}
+            </p>
+          )}
+        </div>
+      </div>
+      {children}
+    </motion.div>
+  );
+}
+
 export default function ProfileClient({ profile }: ProfileProps) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const initials = profile.name
     .split(' ')
     .map((w) => w[0])
@@ -108,250 +179,382 @@ export default function ProfileClient({ profile }: ProfileProps) {
     .slice(0, 2)
     .toUpperCase();
 
+  const handleSaveProfile = async (formData: FormData) => {
+    setIsSubmitting(true);
+    try {
+      const result = await updateStudentProfile(formData);
+      if (result.success) {
+        toast.success('Profile updated successfully!');
+        setIsEditing(false);
+        window.location.reload();
+      } else {
+        toast.error(result.error || 'Failed to update profile');
+      }
+    } catch (error) {
+      toast.error('An unexpected error occurred');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Enhanced quick stats with activity data
+  const activityStats = [
+    {
+      icon: Activity,
+      label: 'Activities',
+      value: profile.eventsRegistered.toString(),
+      color: 'text-blue-600',
+      bg: 'bg-blue-50',
+    },
+    {
+      icon: Award,
+      label: 'Achievements',
+      value: profile.hasGrades ? 'View' : 'None',
+      color: 'text-amber-600',
+      bg: 'bg-amber-50',
+    },
+    {
+      icon: School,
+      label: 'Institution',
+      value: profile.institution || 'N/A',
+      color: 'text-student-primary',
+      bg: 'bg-student-primary/10',
+    },
+    {
+      icon: GraduationCap,
+      label: 'Class',
+      value: profile.classLevel ? `Class ${profile.classLevel}` : 'N/A',
+      color: 'text-student-primary',
+      bg: 'bg-student-primary/10',
+    },
+  ];
+
   return (
-    <div className='p-4 lg:p-8 space-y-8 max-w-[1400px] mx-auto pb-24'>
-      {/* ── Breadcrumb ──────────────────────────────────────── */}
-      {/* ── Page Header ─────────────────────────────────────── */}
-      <div className="mb-8 flex flex-col sm:flex-row sm:items-center gap-6">
-        <div className='w-24 h-24 rounded-full bg-indigo-100 flex items-center justify-center border-4 border-white shadow-sm shrink-0'>
-          <span className='text-indigo-600 font-heading font-black text-3xl'>
-            {initials}
-          </span>
-        </div>
-        <div className='flex-1'>
-          <h1 className="text-3xl md:text-4xl font-heading font-black text-slate-900 tracking-tight leading-tight">
-            {profile.name}
-          </h1>
-          <p className="text-sm text-slate-500 font-medium mt-1">
-            {profile.email} {profile.studentType && `• ${profile.studentType}`} {profile.classLevel && `• Class ${profile.classLevel}`}
-          </p>
-          <div className='flex flex-wrap items-center gap-2 mt-3'>
-            {profile.institution && (
-              <span className='px-3 py-1 rounded-full bg-slate-50 text-[10px] font-bold text-slate-600 uppercase tracking-widest border border-slate-200 flex items-center gap-1.5'>
-                <School className='w-3 h-3 text-slate-400' /> {profile.institution}
-              </span>
-            )}
-            {profile.stream && (
-              <span className='px-3 py-1 rounded-full bg-slate-50 text-[10px] font-bold text-slate-600 uppercase tracking-widest border border-slate-200 flex items-center gap-1.5'>
-                <Target className='w-3 h-3 text-slate-400' /> {profile.stream}
-              </span>
-            )}
-            {profile.createdAt && (
-              <span className='px-3 py-1 rounded-full bg-slate-50 text-[10px] font-bold text-slate-600 uppercase tracking-widest border border-slate-200 flex items-center gap-1.5'>
-                <Calendar className='w-3 h-3 text-slate-400' /> Member since {new Date(profile.createdAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
-              </span>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* ── Profile Sections ─────────────────────────────────── */}
-      <div className='grid grid-cols-1 lg:grid-cols-2 gap-8'>
-        {/* Personal Info */}
+    <div className='min-h-screen bg-student-background'>
+      <div className='p-4 lg:p-8 max-w-7xl mx-auto'>
+        {/* ── Enhanced Hero Section ─────────────────────────────── */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
+          transition={{ duration: 0.6 }}
+          className='mb-8'
         >
-          <div className='bento-card p-8'>
-            <div className='flex items-center gap-3 mb-6 pb-4 border-b border-student-border/20'>
-              <div className='w-10 h-10 rounded-2xl bg-indigo-100 flex items-center justify-center shadow-sm'>
-                <User className='w-5 h-5 text-indigo-600' />
+          <div className='relative overflow-hidden rounded-3xl bg-white border border-student-border/20 shadow-student-lg'>
+            {/* Enhanced gradient header */}
+            <div className='h-32 bg-student-gradient relative'>
+              <div className='absolute inset-0 bg-linear-to-r from-black/20 via-transparent to-black/10' />
+              <div className='absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2'>
+                <div className='flex items-center gap-2 text-white'>
+                  <Sparkles className='w-5 h-5' />
+                  <span className='text-sm font-bold tracking-wide'>
+                    Student Profile
+                  </span>
+                </div>
               </div>
-              <h2 className='font-heading font-black text-student-foreground'>
-                Personal Information
-              </h2>
+              {/* Decorative elements */}
+              <div className='absolute -top-12 -right-12 w-40 h-40 rounded-full bg-white/10 blur-2xl' />
+              <div className='absolute -bottom-8 -left-8 w-32 h-32 rounded-full bg-white/5 blur-xl' />
             </div>
-            <div>
-              <InfoRow icon={User} label='Full Name' value={profile.name} />
-              <InfoRow
-                icon={Mail}
-                label='Email Address'
-                value={profile.email}
-              />
-              <InfoRow
-                icon={Phone}
-                label='Mobile Number'
-                value={profile.mobileNo}
-              />
-              <InfoRow
-                icon={Building}
-                label='Institution'
-                value={profile.institution}
-              />
-              <InfoRow
-                icon={Globe}
-                label='LinkedIn'
-                value={profile.linkedInId}
-              />
-              <InfoRow
-                icon={Calendar}
-                label='Member Since'
-                value={
-                  profile.createdAt
-                    ? new Date(profile.createdAt).toLocaleDateString('en-US', {
-                        day: 'numeric',
-                        month: 'long',
-                        year: 'numeric',
-                      })
-                    : undefined
-                }
-              />
+
+            {/* Profile content */}
+            <div className='px-6 lg:px-8 pb-8'>
+              <div className='flex flex-col lg:flex-row lg:items-end gap-6 -mt-16 mb-6'>
+                {/* Enhanced avatar */}
+                <div className='relative shrink-0'>
+                  <div className='w-28 h-28 rounded-2xl bg-student-gradient flex items-center justify-center border-4 border-white shadow-student-lg'>
+                    <span className='text-white font-heading font-black text-4xl'>
+                      {initials}
+                    </span>
+                  </div>
+                  <div className='absolute -bottom-2 -right-2 w-8 h-8 rounded-full bg-green-500 border-4 border-white flex items-center justify-center'>
+                    <div className='w-2 h-2 rounded-full bg-white' />
+                  </div>
+                </div>
+
+                {/* Profile info */}
+                <div className='flex-1 min-w-0 lg:mr-4 pb-2'>
+                  <h1 className='text-2xl lg:text-3xl font-heading font-black text-student-foreground tracking-tight leading-tight mb-2 wrap-break-word'>
+                    {profile.name}
+                  </h1>
+                  <p className='text-[14px] lg:text-[15px] text-student-muted-foreground font-medium mb-3 break-all'>
+                    {profile.email}
+                  </p>
+                  <div className='flex flex-wrap items-center gap-3'>
+                    {profile.stream && (
+                      <span className='px-3 py-1 rounded-full bg-student-primary/10 text-[11px] font-bold text-student-primary border border-student-primary/20 flex items-center gap-1.5'>
+                        <Target className='w-3 h-3' />
+                        {profile.stream}
+                      </span>
+                    )}
+                    {profile.createdAt && (
+                      <span className='px-3 py-1 rounded-full bg-student-muted/50 text-[11px] font-bold text-student-muted-foreground border border-student-border/20 flex items-center gap-1.5'>
+                        <Calendar className='w-3 h-3' />
+                        Since {new Date(profile.createdAt).getFullYear()}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Enhanced edit button */}
+                <button
+                  onClick={() => setIsEditing(!isEditing)}
+                  className={`px-6 py-3 rounded-xl text-[13px] font-bold flex items-center gap-2 transition-all shrink-0 ${
+                    isEditing
+                      ? 'bg-student-danger/10 text-student-danger border border-student-danger/20 hover:bg-student-danger/15'
+                      : 'bg-student-gradient text-white shadow-student hover:shadow-student-lg hover:-translate-y-0.5'
+                  }`}
+                >
+                  {isEditing ? (
+                    <>
+                      <X className='w-4 h-4' /> Cancel
+                    </>
+                  ) : (
+                    <>
+                      <Edit className='w-4 h-4' /> Edit Profile
+                    </>
+                  )}
+                </button>
+              </div>
+
+              {/* Activity stats bar */}
+              <div className='grid grid-cols-2 lg:grid-cols-4 gap-3'>
+                {activityStats.map((stat) => {
+                  const Icon = stat.icon;
+                  return (
+                    <div
+                      key={stat.label}
+                      className='flex items-center gap-3 p-3 rounded-xl bg-student-muted/30 border border-student-border/10 hover:bg-student-muted/40 transition-colors'
+                    >
+                      <div
+                        className={`w-8 h-8 rounded-lg ${stat.bg} flex items-center justify-center shrink-0`}
+                      >
+                        <Icon className={`w-4 h-4 ${stat.color}`} />
+                      </div>
+                      <div className='min-w-0'>
+                        <p className='text-[8px] font-black text-student-muted-foreground uppercase tracking-[0.15em] leading-none'>
+                          {stat.label}
+                        </p>
+                        <p className='text-[12px] font-bold text-student-foreground truncate'>
+                          {stat.value}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           </div>
         </motion.div>
 
-        {/* Academic Details */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-        >
-          <div className='bento-card p-8'>
-            <div className='flex items-center gap-3 mb-6 pb-4 border-b border-student-border/20'>
-              <div className='w-10 h-10 rounded-2xl bg-indigo-100 flex items-center justify-center shadow-sm'>
-                <GraduationCap className='w-5 h-5 text-indigo-600' />
-              </div>
-              <h2 className='font-heading font-black text-student-foreground'>
-                Academic Details
-              </h2>
-            </div>
-            <div>
-              <InfoRow
+        {/* ── Enhanced Profile Sections ─────────────────────────── */}
+        {isEditing ? (
+          <ProfileEditForm
+            profile={profile}
+            onSave={handleSaveProfile}
+            onCancel={() => setIsEditing(false)}
+            isSubmitting={isSubmitting}
+          />
+        ) : (
+          <div className='grid grid-cols-1 lg:grid-cols-3 gap-6'>
+            {/* Main Content - 2 columns */}
+            <div className='lg:col-span-2 space-y-6'>
+              {/* Personal Information */}
+              <SectionCard icon={User} title='Personal Information' delay={0.1}>
+                <div className='grid grid-cols-1 sm:grid-cols-2 gap-3'>
+                  <InfoCard
+                    icon={User}
+                    label='Full Name'
+                    value={profile.name}
+                  />
+                  <InfoCard icon={Mail} label='Email' value={profile.email} />
+                  <InfoCard
+                    icon={Phone}
+                    label='Mobile'
+                    value={profile.mobileNo}
+                  />
+                  <InfoCard
+                    icon={Building}
+                    label='Institution'
+                    value={profile.institution}
+                  />
+                  <InfoCard
+                    icon={Globe}
+                    label='LinkedIn'
+                    value={profile.linkedInId}
+                  />
+                  <InfoCard
+                    icon={Calendar}
+                    label='Member Since'
+                    value={
+                      profile.createdAt
+                        ? new Date(profile.createdAt).toLocaleDateString(
+                            'en-US',
+                            {
+                              day: 'numeric',
+                              month: 'long',
+                              year: 'numeric',
+                            },
+                          )
+                        : undefined
+                    }
+                  />
+                </div>
+              </SectionCard>
+
+              {/* Academic Details */}
+              <SectionCard
                 icon={GraduationCap}
-                label='Student Type'
-                value={profile.studentType}
-              />
-              <InfoRow
-                icon={BookOpen}
-                label='Class / Year'
-                value={
-                  profile.classLevel
-                    ? `Class ${profile.classLevel}`
-                    : profile.year
-                      ? `Year ${profile.year}`
-                      : undefined
+                title='Academic Details'
+                delay={0.15}
+                badge={
+                  profile.classLevel ? `Class ${profile.classLevel}` : undefined
                 }
-              />
-              <InfoRow icon={Target} label='Stream' value={profile.stream} />
-              <InfoRow
-                icon={Building}
-                label='College'
-                value={profile.college}
-              />
-              <InfoRow icon={BookOpen} label='Course' value={profile.course} />
-              <TagList items={profile.subjects} label='Subjects' />
+              >
+                <div className='space-y-3'>
+                  <div className='grid grid-cols-1 sm:grid-cols-2 gap-3'>
+                    <InfoCard
+                      icon={GraduationCap}
+                      label='Student Type'
+                      value={profile.studentType}
+                    />
+                    <InfoCard
+                      icon={Target}
+                      label='Stream'
+                      value={profile.stream}
+                    />
+                  </div>
+                  <TagCloud items={profile.subjects} label='Subjects' />
+                </div>
+              </SectionCard>
+
+              {/* Parent Information */}
+              {(profile.fatherName || profile.motherName) && (
+                <SectionCard icon={Users} title='Parent / Guardian' delay={0.2}>
+                  <div className='space-y-4'>
+                    {profile.fatherName && (
+                      <div className='p-4 rounded-xl bg-student-muted/20 border border-student-border/10'>
+                        <p className='text-[10px] font-black text-student-muted-foreground uppercase tracking-[0.2em] mb-3'>
+                          Father's Information
+                        </p>
+                        <div className='grid grid-cols-1 sm:grid-cols-2 gap-3'>
+                          <InfoCard
+                            icon={User}
+                            label='Name'
+                            value={profile.fatherName}
+                            variant='compact'
+                          />
+                          <InfoCard
+                            icon={Briefcase}
+                            label='Occupation'
+                            value={profile.fatherOccupation}
+                            variant='compact'
+                          />
+                          <InfoCard
+                            icon={Phone}
+                            label='Mobile'
+                            value={profile.fatherMobile}
+                            variant='compact'
+                          />
+                          <InfoCard
+                            icon={Mail}
+                            label='Email'
+                            value={profile.fatherEmail}
+                            variant='compact'
+                          />
+                        </div>
+                      </div>
+                    )}
+                    {profile.motherName && (
+                      <div className='p-4 rounded-xl bg-student-muted/20 border border-student-border/10'>
+                        <p className='text-[10px] font-black text-student-muted-foreground uppercase tracking-[0.2em] mb-3'>
+                          Mother's Information
+                        </p>
+                        <div className='grid grid-cols-1 sm:grid-cols-2 gap-3'>
+                          <InfoCard
+                            icon={User}
+                            label='Name'
+                            value={profile.motherName}
+                            variant='compact'
+                          />
+                          <InfoCard
+                            icon={Briefcase}
+                            label='Occupation'
+                            value={profile.motherOccupation}
+                            variant='compact'
+                          />
+                          <InfoCard
+                            icon={Phone}
+                            label='Mobile'
+                            value={profile.motherMobile}
+                            variant='compact'
+                          />
+                          <InfoCard
+                            icon={Mail}
+                            label='Email'
+                            value={profile.motherEmail}
+                            variant='compact'
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </SectionCard>
+              )}
+            </div>
+
+            {/* Sidebar - 1 column */}
+            <div className='space-y-6'>
+              {/* Targets & Aspirations */}
+              {(profile.targetedExams?.length ||
+                profile.targetedInstitutions?.length ||
+                profile.targetedCountries?.length ||
+                profile.targetedCourses?.length) && (
+                <SectionCard icon={Trophy} title='Targets & Goals' delay={0.25}>
+                  <div className='space-y-3'>
+                    <TagCloud
+                      items={profile.targetedExams}
+                      label='Targeted Exams'
+                    />
+                    <TagCloud
+                      items={profile.targetedInstitutions}
+                      label='Institutions'
+                    />
+                    <TagCloud
+                      items={profile.targetedCountries}
+                      label='Countries'
+                    />
+                    <TagCloud items={profile.targetedCourses} label='Courses' />
+                    <TagCloud
+                      items={profile.otherTargets}
+                      label='Other Goals'
+                    />
+                  </div>
+                </SectionCard>
+              )}
+
+              {/* Quick Actions */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className='p-4 rounded-xl bg-student-gradient text-white'
+              >
+                <h3 className='font-heading font-black text-lg mb-3'>
+                  Quick Actions
+                </h3>
+                <div className='space-y-2'>
+                  <button className='w-full px-4 py-2.5 rounded-xl bg-white/20 hover:bg-white/30 text-white text-[13px] font-bold transition-colors flex items-center justify-center gap-2'>
+                    <Award className='w-4 h-4' />
+                    View Academic Progress
+                  </button>
+                  <button className='w-full px-4 py-2.5 rounded-xl bg-white/20 hover:bg-white/30 text-white text-[13px] font-bold transition-colors flex items-center justify-center gap-2'>
+                    <Activity className='w-4 h-4' />
+                    Browse Activities
+                  </button>
+                </div>
+              </motion.div>
             </div>
           </div>
-        </motion.div>
-
-        {/* Parent / Guardian Details */}
-        {(profile.fatherName || profile.motherName) && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-          >
-            <div className='bento-card p-8'>
-              <div className='flex items-center gap-3 mb-6 pb-4 border-b border-student-border/20'>
-                <div className='w-10 h-10 rounded-2xl bg-indigo-100 flex items-center justify-center shadow-sm'>
-                  <User className='w-5 h-5 text-indigo-600' />
-                </div>
-                <h2 className='font-heading font-black text-student-foreground'>
-                  Parent / Guardian
-                </h2>
-              </div>
-              <div>
-                {profile.fatherName && (
-                  <>
-                    <InfoRow
-                      icon={User}
-                      label="Father's Name"
-                      value={profile.fatherName}
-                    />
-                    <InfoRow
-                      icon={Briefcase}
-                      label="Father's Occupation"
-                      value={profile.fatherOccupation}
-                    />
-                    <InfoRow
-                      icon={Phone}
-                      label="Father's Mobile"
-                      value={profile.fatherMobile}
-                    />
-                    <InfoRow
-                      icon={Mail}
-                      label="Father's Email"
-                      value={profile.fatherEmail}
-                    />
-                  </>
-                )}
-                {profile.motherName && (
-                  <>
-                    <InfoRow
-                      icon={User}
-                      label="Mother's Name"
-                      value={profile.motherName}
-                    />
-                    <InfoRow
-                      icon={Briefcase}
-                      label="Mother's Occupation"
-                      value={profile.motherOccupation}
-                    />
-                    <InfoRow
-                      icon={Phone}
-                      label="Mother's Mobile"
-                      value={profile.motherMobile}
-                    />
-                    <InfoRow
-                      icon={Mail}
-                      label="Mother's Email"
-                      value={profile.motherEmail}
-                    />
-                  </>
-                )}
-              </div>
-            </div>
-          </motion.div>
-        )}
-
-        {/* Targets & Aspirations */}
-        {(profile.targetedExams?.length ||
-          profile.targetedInstitutions?.length ||
-          profile.targetedCountries?.length ||
-          profile.targetedCourses?.length) && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
-          >
-            <div className='bento-card p-8'>
-              <div className='flex items-center gap-3 mb-6 pb-4 border-b border-student-border/20'>
-                <div className='w-10 h-10 rounded-2xl bg-indigo-100 flex items-center justify-center shadow-sm'>
-                  <Target className='w-5 h-5 text-indigo-600' />
-                </div>
-                <h2 className='font-heading font-black text-student-foreground'>
-                  Targets & Aspirations
-                </h2>
-              </div>
-              <div>
-                <TagList items={profile.targetedExams} label='Targeted Exams' />
-                <TagList
-                  items={profile.targetedInstitutions}
-                  label='Targeted Institutions'
-                />
-                <TagList
-                  items={profile.targetedCountries}
-                  label='Targeted Countries'
-                />
-                <TagList
-                  items={profile.targetedCourses}
-                  label='Targeted Courses'
-                />
-                <TagList items={profile.otherTargets} label='Other Targets' />
-              </div>
-            </div>
-          </motion.div>
         )}
       </div>
     </div>

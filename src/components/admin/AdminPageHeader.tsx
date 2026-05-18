@@ -30,12 +30,12 @@ export function AdminPageHeader({
         transition={{ duration: 0.35, ease: 'easeOut' }}
       >
         {/* Breadcrumb */}
-        <div className='flex items-center gap-2 mb-3'>
-          <span className='px-2.5 py-0.5 rounded-md bg-purple-primary/10 text-[10px] font-black text-purple-primary uppercase tracking-widest'>
+        <div className='flex items-center gap-2 mb-4'>
+          <span className='px-2.5 py-0.5 rounded-md bg-purple-primary/10 text-[10px] font-bold text-purple-primary uppercase tracking-[0.12em]'>
             Admin
           </span>
-          <ChevronRight className='w-3 h-3 text-purple-primary' />
-          <span className='text-[10px] font-black text-purple-muted-foreground uppercase tracking-widest'>
+          <ChevronRight className='w-3 h-3 text-purple-primary/40' />
+          <span className='text-[10px] font-bold text-purple-muted-foreground/60 uppercase tracking-[0.12em]'>
             {section}
           </span>
         </div>

@@ -5,6 +5,7 @@ export interface IAcademicTest extends Document {
   date: Date;
   targetClass?: string;
   targetStream?: string;
+  targetSchool?: string;
 }
 
 const AcademicTestSchema: Schema = new Schema(
@@ -13,6 +14,7 @@ const AcademicTestSchema: Schema = new Schema(
     date: { type: Date, required: true },
     targetClass: { type: String },
     targetStream: { type: String },
+    targetSchool: { type: String },
   },
   { timestamps: true }
 );
