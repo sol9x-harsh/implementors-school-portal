@@ -10,7 +10,7 @@ import Student from '@/lib/models/Student';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { revalidatePath } from 'next/cache';
-import { buildStudentCohortIds } from '@/lib/constants/cohorts';
+import { buildStudentCohortIds, streamToProgramCode } from '@/lib/constants/cohorts';
 
 // ─── HELPERS ─────────────────────────────────────────────────────────────────
 
@@ -22,15 +22,20 @@ async function requireStudent() {
   return session;
 }
 
-/** Build the list of cohort tags the student belongs to */
+/** Build the full set of hierarchical cohort URN tags for a student. */
 async function buildStudentCohorts(userId: string) {
   const user = await Student.findById(userId);
   if (!user) return { user: null, cohorts: ['all'] };
 
+  // Normalise the free-text stream value stored in MongoDB to a canonical
+  // ProgramCode before building the specificity ladder.
+  const program = streamToProgramCode(user.stream);
+
   const cohorts = buildStudentCohortIds(
-    user.classLevel,
-    user.stream,
+    'school',
     user.institution,
+    user.classLevel,
+    program,
   );
   return { user, cohorts };
 }

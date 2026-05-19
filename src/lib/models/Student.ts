@@ -10,7 +10,7 @@ export interface IStudent extends Document {
   classLevel?: string;
   stream?: string;
   subjects?: string[];
-  
+
   // Parent Details
   fatherName?: string;
   fatherOccupation?: string;
@@ -59,9 +59,10 @@ const StudentSchema: Schema = new Schema(
     targetedCourses: [{ type: String }],
     otherTargets: [{ type: String }],
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
-const Student: Model<IStudent> = mongoose.models.Student || mongoose.model<IStudent>('Student', StudentSchema);
+const Student: Model<IStudent> =
+  mongoose.models.Student || mongoose.model<IStudent>('Student', StudentSchema);
 
 export default Student;

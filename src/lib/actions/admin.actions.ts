@@ -10,7 +10,12 @@ import InternalGrade from '@/lib/models/InternalGrade';
 import EventRegistration from '@/lib/models/EventRegistration';
 import AcademicTest from '@/lib/models/AcademicTest';
 import AnnualReport, { IAnnualReport } from '@/lib/models/AnnualReport';
-import { COHORT_OPTIONS } from '@/lib/constants/cohorts';
+import {
+  PROGRAMS,
+  type ProgramCode,
+  parseCohortUrn,
+  getAdminTargetOptions,
+} from '@/lib/constants/cohorts';
 import { revalidatePath } from 'next/cache';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
@@ -536,13 +541,10 @@ export async function getCohortCounts() {
   await dbConnect();
 
   const [class12, class12pcm, class11, total] = await Promise.all([
-    Student.countDocuments({ classLevel: '12' }),
-    Student.countDocuments({
-      classLevel: '12',
-      stream: { $regex: /pcm|physics|science/i },
-    }),
-    Student.countDocuments({ classLevel: '11' }),
-    Student.countDocuments(),
+    Student.countDocuments(buildCohortQuery('school:all:12:all')),
+    Student.countDocuments(buildCohortQuery('school:all:12:sci-pcm')),
+    Student.countDocuments(buildCohortQuery('school:all:11:all')),
+    Student.countDocuments({}),
   ]);
 
   return { class12, class12pcm, class11, total };
@@ -583,50 +585,59 @@ export async function getStudentById(id: string) {
 
 // --- ANNUAL REPORTS ---
 
-function buildCohortQuery(cohortValue: string): Record<string, unknown> {
-  if (cohortValue === 'all') return {};
+/**
+ * Translates a cohort URN into a structured MongoDB filter object.
+ *
+ * Field mapping:
+ *   institution_id → Student.institution  (exact string match)
+ *   level          → Student.classLevel   (exact string match)
+ *   program        → Student.stream       (exact string match via PROGRAMS[code].dbStream)
+ *
+ * No regex is used — canonical `dbStream` values are exact strings written by
+ * the admin UI, so exact matching is both correct and index-friendly.
+ */
+function buildCohortQuery(urn: string): Record<string, unknown> {
+  if (urn === 'all') return {};
 
-  const parts = cohortValue.split(':');
+  const parsed = parseCohortUrn(urn);
+  if (!parsed) return {}; // malformed URN — return no-filter rather than crashing
+
   const query: Record<string, unknown> = {};
 
-  // parts[1] is classLevel (e.g. "12"), parts[2] is stream key
-  if (parts[1]) query.classLevel = parts[1];
+  if (parsed.institutionId !== 'all') {
+    query.institution = parsed.institutionId;
+  }
 
-  if (parts[2]) {
-    switch (parts[2]) {
-      case 'pcm':
-        query.stream = { $regex: /Science \(PCM\)/i };
-        break;
-      case 'pcb':
-        query.stream = { $regex: /Science \(PCB\)/i };
-        break;
-      case 'pcmb':
-        query.stream = { $regex: /Science \(PCMB\)/i };
-        break;
-      case 'commerce_math':
-        query.stream = { $regex: /Commerce \(With Maths\)/i };
-        break;
-      case 'commerce_no_math':
-        query.stream = { $regex: /Commerce \(Without Maths\)/i };
-        break;
-      case 'humanities':
-        query.stream = { $regex: /Humanities/i };
-        break;
+  if (parsed.level !== 'all') {
+    query.classLevel = parsed.level;
+  }
+
+  if (parsed.program !== 'all') {
+    const programDef = PROGRAMS[parsed.program as ProgramCode];
+    if (programDef?.dbStream) {
+      query.stream = programDef.dbStream;
     }
   }
 
   return query;
 }
 
+/**
+ * Returns each available cohort option together with the live count of
+ * matching students. Used by the Annual Reports UI to show audience sizes
+ * before a report is generated.
+ */
 export async function getCohortOptionsWithCounts() {
   await requireAdmin();
   await dbConnect();
 
+  const options = getAdminTargetOptions('school', 'all');
+
   const results = await Promise.all(
-    COHORT_OPTIONS.map(async (opt) => {
+    options.map(async (opt) => {
       const count = await Student.countDocuments(buildCohortQuery(opt.value));
       return { value: opt.value, label: opt.label, count };
-    })
+    }),
   );
 
   return results;
@@ -636,14 +647,20 @@ export async function generateAnnualReport(cohortValue: string) {
   const session = await requireAdmin();
   await dbConnect();
 
-  const cohortOption = COHORT_OPTIONS.find((o) => o.value === cohortValue);
-  if (!cohortOption) throw new Error('Invalid cohort value');
+  // Validate the URN before touching the DB
+  const parsed = parseCohortUrn(cohortValue);
+  if (!parsed) throw new Error(`Invalid cohort URN: "${cohortValue}"`);
+
+  // Derive a human-readable label from the options list for the stored report
+  const options = getAdminTargetOptions(parsed.domain, parsed.institutionId);
+  const matched = options.find((o) => o.value === cohortValue);
+  const cohortLabel = matched?.label ?? cohortValue;
 
   const studentCount = await Student.countDocuments(buildCohortQuery(cohortValue));
 
   const report = (await AnnualReport.create({
     cohortValue,
-    cohortLabel: cohortOption.label,
+    cohortLabel,
     studentCount,
     generatedAt: new Date(),
     status: 'complete',

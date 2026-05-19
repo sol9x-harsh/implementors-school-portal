@@ -6,6 +6,7 @@ export interface IAcademicTest extends Document {
   targetClass?: string;
   targetStream?: string;
   targetSchool?: string;
+  marksUploaded?: boolean;
 }
 
 const AcademicTestSchema: Schema = new Schema(
@@ -15,6 +16,7 @@ const AcademicTestSchema: Schema = new Schema(
     targetClass: { type: String },
     targetStream: { type: String },
     targetSchool: { type: String },
+    marksUploaded: { type: Boolean, default: false },
   },
   { timestamps: true }
 );

@@ -37,7 +37,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { createAcademicTest } from '@/lib/actions/test.actions';
+import { createAcademicTest, uploadTestMarks } from '@/lib/actions/test.actions';
 import { AdminPageHeader } from '@/components/admin/AdminPageHeader';
 import { AdminFilterBar } from '@/components/admin/AdminFilterBar';
 import {
@@ -48,8 +48,28 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { SCHOOL_COHORTS, ACADEMIC_STREAMS } from '@/lib/constants/cohorts';
+import { useRouter } from 'next/navigation';
 
 const ITEMS_PER_PAGE = 12;
+
+function parseCsv(text: string): Record<string, string>[] {
+  const lines = text.trim().split(/\r?\n/);
+  if (lines.length < 2) return [];
+  const headers = lines[0]
+    .split(',')
+    .map((h) => h.trim().replace(/^"|"$/g, ''));
+  return lines
+    .slice(1)
+    .map((line) => {
+      const values = line.split(',').map((v) => v.trim().replace(/^"|"$/g, ''));
+      const row: Record<string, string> = {};
+      headers.forEach((h, i) => {
+        row[h] = values[i] || '';
+      });
+      return row;
+    })
+    .filter((r) => Object.values(r).some((v) => v));
+}
 
 interface AcademicTest {
   _id: string;
@@ -68,7 +88,9 @@ export default function TestManagementClient({
   initialTests,
   schools,
 }: TestManagementClientProps) {
+  const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isUploading, setIsUploading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -130,15 +152,15 @@ export default function TestManagementClient({
       {/* Header */}
       <AdminPageHeader
         section='Academics'
-        title='Test Management'
-        subtitle='Create and manage dynamic exams, internal tests, and performance grading.'
+        title='Assessments'
+        subtitle='Create and manage academic assessments, examinations, and performance grading.'
         icon={ClipboardList}
         actions={
           <Button
             onClick={() => setIsModalOpen(true)}
-            className='h-8 px-3.5 rounded-lg bg-purple-primary hover:bg-purple-primary/90 text-white text-[11px] font-bold gap-1.5 btn-shimmer shadow-purple-sm'
+            className='h-8 px-3.5 rounded-lg admin-button admin-button-primary text-[11px] font-bold gap-1.5 btn-shimmer'
           >
-            <Plus className='w-3.5 h-3.5' /> Create Test
+            <Plus className='w-3.5 h-3.5' /> Create Assessment
           </Button>
         }
       />
@@ -149,45 +171,72 @@ export default function TestManagementClient({
           initial={{ opacity: 0, y: 6 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.05 }}
-          className='grid grid-cols-2 gap-3'
+          className='space-y-3'
         >
-          <div className='flex items-center gap-3 bg-white border border-purple-border/30 rounded-xl px-4 py-3 shadow-sm'>
-            <div className='w-8 h-8 rounded-lg bg-purple-primary/10 flex items-center justify-center shrink-0'>
-              <CheckCircle2 className='w-4 h-4 text-purple-primary' />
-            </div>
-            <div>
-              <p className='text-[10px] font-black text-purple-secondary-foreground uppercase tracking-widest'>
-                Marks Uploaded
+          {/* Progress bar */}
+          <div className='bg-white border border-purple-border/30 rounded-xl px-5 py-4 shadow-sm'>
+            <div className='flex items-center justify-between mb-2'>
+              <p className='text-[11px] font-bold text-purple-foreground'>
+                Marks upload progress
               </p>
-              <p className='text-xl font-heading font-black text-purple-primary leading-tight'>
-                {uploadedCount}
-              </p>
+              <span className='text-[12px] font-black text-purple-primary tabular-nums'>
+                {uploadedCount} / {initialTests.length}
+              </span>
             </div>
-            <span className='ml-auto text-[10px] font-bold text-purple-primary/60 bg-purple-secondary/15 border border-purple-border/20 px-2 py-0.5 rounded-full'>
-              {initialTests.length > 0
-                ? Math.round((uploadedCount / initialTests.length) * 100)
-                : 0}
-              %
-            </span>
+            {/* Visual bar */}
+            <div className='h-2 w-full bg-purple-secondary/40 rounded-full overflow-hidden'>
+              <div
+                className='h-full rounded-full transition-all duration-700'
+                style={{
+                  width: `${initialTests.length > 0 ? Math.round((uploadedCount / initialTests.length) * 100) : 0}%`,
+                  background: 'linear-gradient(90deg, oklch(0.55 0.22 278), oklch(0.68 0.20 285))',
+                }}
+              />
+            </div>
+            <div className='flex items-center justify-between mt-1.5'>
+              <span className='text-[10px] font-medium text-purple-muted-foreground/60'>
+                {uploadedCount} uploaded
+              </span>
+              <span className='text-[10px] font-medium text-amber-600'>
+                {pendingCount} pending
+              </span>
+            </div>
           </div>
-          <div className='flex items-center gap-3 bg-white border border-amber-200 rounded-xl px-4 py-3 shadow-sm'>
-            <div className='w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center shrink-0'>
-              <Clock3 className='w-4 h-4 text-amber-600' />
+
+          {/* Two stat cards */}
+          <div className='grid grid-cols-2 gap-3'>
+            <div className='flex items-center gap-3 bg-white border border-purple-border/30 rounded-xl px-4 py-3 shadow-sm'>
+              <div className='w-8 h-8 rounded-lg bg-purple-primary/10 flex items-center justify-center shrink-0'>
+                <CheckCircle2 className='w-4 h-4 text-purple-primary' />
+              </div>
+              <div>
+                <p className='text-[10px] font-black text-purple-secondary-foreground uppercase tracking-widest'>
+                  Uploaded
+                </p>
+                <p className='text-xl font-heading font-black text-purple-primary leading-tight'>
+                  {uploadedCount}
+                </p>
+              </div>
+              <span className='ml-auto text-[10px] font-bold text-purple-primary/60 bg-purple-secondary/15 border border-purple-border/20 px-2 py-0.5 rounded-full'>
+                {initialTests.length > 0 ? Math.round((uploadedCount / initialTests.length) * 100) : 0}%
+              </span>
             </div>
-            <div>
-              <p className='text-[10px] font-black text-amber-700 uppercase tracking-widest'>
-                Marks Pending
-              </p>
-              <p className='text-xl font-heading font-black text-amber-600 leading-tight'>
-                {pendingCount}
-              </p>
+            <div className='flex items-center gap-3 bg-white border border-amber-200 rounded-xl px-4 py-3 shadow-sm'>
+              <div className='w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center shrink-0'>
+                <Clock3 className='w-4 h-4 text-amber-600' />
+              </div>
+              <div>
+                <p className='text-[10px] font-black text-amber-700 uppercase tracking-widest'>
+                  Pending
+                </p>
+                <p className='text-xl font-heading font-black text-amber-600 leading-tight'>
+                  {pendingCount}
+                </p>
+              </div>
+              <span className='ml-auto text-[10px] font-bold text-amber-600/60 bg-amber-50 border border-amber-100 px-2 py-0.5 rounded-full'>
+                {initialTests.length > 0 ? Math.round((pendingCount / initialTests.length) * 100) : 0}%
+              </span>
             </div>
-            <span className='ml-auto text-[10px] font-bold text-amber-600/60 bg-amber-50 border border-amber-100 px-2 py-0.5 rounded-full'>
-              {initialTests.length > 0
-                ? Math.round((pendingCount / initialTests.length) * 100)
-                : 0}
-              %
-            </span>
           </div>
         </motion.div>
       )}
@@ -211,7 +260,7 @@ export default function TestManagementClient({
         <div className='overflow-x-auto scrollbar-thin'>
         <Table>
           <TableHeader>
-            <TableRow className='hover:bg-transparent border-b border-purple-border/30 bg-[oklch(0.975_0.006_285)]'>
+            <TableRow className='hover:bg-transparent border-b border-purple-border/40 bg-purple-secondary/25'>
               {[
                 '#',
                 'Test Identity',
@@ -222,7 +271,7 @@ export default function TestManagementClient({
               ].map((h) => (
                 <TableHead
                   key={h}
-                  className={`h-10 px-5 font-black uppercase tracking-widest text-[10px] text-purple-muted-foreground/60 ${h === 'Actions' ? 'w-28 text-right' : ''} ${h === 'Marks Status' ? 'w-36' : ''}`}
+                  className={`h-11 px-5 font-black uppercase tracking-[0.13em] text-[10px] text-purple-muted-foreground/55 text-left ${h === 'Actions' ? 'w-28 text-right' : ''} ${h === 'Marks Status' ? 'w-36' : ''}`}
                 >
                   {h}
                 </TableHead>
@@ -239,7 +288,7 @@ export default function TestManagementClient({
                 return (
                   <TableRow
                     key={test._id}
-                    className={`border-b border-purple-border/15 group ${idx % 2 === 1 ? 'bg-[oklch(0.975_0.006_285)]/50' : 'bg-white'}`}
+                    className={`border-b border-purple-border/15 group hover:bg-purple-secondary/25 transition-colors duration-150 ${idx % 2 === 1 ? 'bg-purple-background/45' : 'bg-white'}`}
                   >
                     {/* Index */}
                     <TableCell className='py-3 px-5 w-12'>
@@ -317,8 +366,7 @@ export default function TestManagementClient({
                       <button
                         onClick={() => setUploadTestId(test._id)}
                         title='Upload Marks CSV'
-                        className='inline-flex items-center gap-1.5 h-8 px-3 rounded-lg border text-[11px] font-bold transition-all duration-150 shadow-sm
-                          bg-purple-primary border-purple-primary text-white hover:bg-purple-primary/90 hover:shadow-purple-sm'
+                        className='inline-flex items-center gap-1.5 h-8 px-3 rounded-lg text-[11px] font-bold transition-all duration-150 admin-button admin-button-primary btn-shimmer'
                       >
                         <UploadCloud className='w-3.5 h-3.5' />
                         Upload
@@ -490,7 +538,7 @@ export default function TestManagementClient({
               <Button
                 type='submit'
                 disabled={isSubmitting}
-                className='w-full h-10 rounded-lg bg-purple-primary text-white font-black uppercase tracking-widest btn-shimmer shadow-purple-sm'
+                className='w-full h-10 rounded-lg admin-button admin-button-primary font-black uppercase tracking-widest btn-shimmer'
               >
                 {isSubmitting ? (
                   <>
@@ -604,20 +652,55 @@ export default function TestManagementClient({
               Cancel
             </Button>
             <Button
-              disabled={!marksFile}
-              onClick={() => {
-                if (uploadTestId) {
-                  setUploadedIds((prev) => new Set([...prev, uploadTestId]));
+              disabled={!marksFile || isUploading}
+              onClick={async () => {
+                if (!marksFile || !uploadTestId) return;
+                setIsUploading(true);
+                try {
+                  const text = await marksFile.text();
+                  const rows = parseCsv(text);
+                  if (rows.length === 0) {
+                    toast.error('CSV file is empty or has no valid data rows.');
+                    setIsUploading(false);
+                    return;
+                  }
+                  const result = await uploadTestMarks(
+                    uploadTestId,
+                    rows as any,
+                  );
+                  if (result.success) {
+                    setUploadedIds((prev) => new Set([...prev, uploadTestId]));
+                    toast.success(
+                      `${result.created} marks imported successfully!`,
+                      {
+                        description:
+                          result.skipped > 0
+                            ? `${result.skipped} rows skipped.`
+                            : undefined,
+                      },
+                    );
+                    setUploadTestId(null);
+                    setMarksFile(null);
+                    router.refresh();
+                  } else {
+                    toast.error(
+                      result.error || 'Failed to process marks CSV.',
+                    );
+                  }
+                } catch {
+                  toast.error('Failed to read or process CSV file.');
+                } finally {
+                  setIsUploading(false);
                 }
-                toast.success('Marks CSV queued for processing.', {
-                  description: 'Scores will be visible to students shortly.',
-                });
-                setUploadTestId(null);
-                setMarksFile(null);
               }}
               className='rounded-lg bg-purple-primary text-white font-black text-[12px] uppercase tracking-widest gap-2 btn-shimmer'
             >
-              <UploadCloud className='w-4 h-4' /> Process Marks
+              {isUploading ? (
+                <Loader2 className='w-4 h-4 animate-spin' />
+              ) : (
+                <UploadCloud className='w-4 h-4' />
+              )}
+              {isUploading ? 'Processing...' : 'Process Marks'}
             </Button>
           </DialogFooter>
         </DialogContent>

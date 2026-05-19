@@ -126,13 +126,13 @@ export default function SchoolsClient({ initialSchools }: { initialSchools: Scho
     <div className='admin-shell space-y-8'>
       <AdminPageHeader
         section='Management'
-        title='School Management'
-        subtitle='Create and manage schools to assign students and organize academic cohorts.'
+        title='Institutions'
+        subtitle='Create and manage institutions to assign students and organize academic cohorts.'
         icon={SchoolIcon}
         actions={
           <Button onClick={() => { resetForm(); setIsModalOpen(true); }}
-            className='h-9 px-4 rounded-xl bg-purple-primary hover:bg-purple-primary/90 text-white font-bold gap-2 btn-shimmer shadow-purple-sm'>
-            <Plus className='w-4 h-4' /> Add School
+            className='h-9 px-4 rounded-xl admin-button admin-button-primary font-bold gap-2 btn-shimmer'>
+            <Plus className='w-4 h-4' /> Add Institution
           </Button>
         }
       />
@@ -316,7 +316,7 @@ export default function SchoolsClient({ initialSchools }: { initialSchools: Scho
                 Cancel
               </Button>
               <Button type='submit' disabled={isSubmitting || !name}
-                className='h-12 flex-1 rounded-2xl bg-purple-gradient text-white font-heading font-black text-sm uppercase tracking-widest shadow-purple-md btn-shimmer'>
+                className='h-12 flex-1 rounded-2xl admin-button admin-button-primary font-heading font-black text-sm uppercase tracking-widest btn-shimmer'>
                 {isSubmitting ? <Loader2 className='w-4 h-4 animate-spin' /> : (editingId ? 'Update Profile' : 'Register School')}
               </Button>
             </DialogFooter>

@@ -57,6 +57,13 @@
   --color-purple-input: var(--purple-input);
   --color-purple-ring: var(--purple-ring);
 
+  /* Gold / Mustard Accent Colors */
+  --color-gold-primary: var(--gold-primary);
+  --color-gold-light: var(--gold-light);
+  --color-gold-muted: var(--gold-muted);
+  --color-gold-foreground: var(--gold-foreground);
+  --color-gold-border: var(--gold-border);
+
   /* Student Theme Colors (Indigo + Violet) */
   --color-student-background: var(--student-background);
   --color-student-foreground: var(--student-foreground);
@@ -140,39 +147,53 @@
   --sidebar-border: oklch(0.89 0.01 265);
   --sidebar-ring: oklch(0.55 0.2 265);
 
-  /* Purple Theme (ia Academy Inspired) */
-  --purple-background: oklch(0.985 0.008 280);
-  --purple-foreground: oklch(0.25 0.05 285);
+  /* Purple Theme (Amethyst Clarity) */
+  --purple-background: oklch(0.965 0.012 282);
+  --purple-foreground: oklch(0.20 0.07 282);
 
-  --purple-primary: oklch(0.6 0.18 280);
+  --purple-primary: oklch(0.52 0.22 278);
   --purple-primary-foreground: oklch(0.98 0.01 280);
 
-  --purple-secondary: oklch(0.94 0.04 285);
-  --purple-secondary-foreground: oklch(0.35 0.1 285);
+  --purple-secondary: oklch(0.935 0.055 282);
+  --purple-secondary-foreground: oklch(0.30 0.10 282);
 
-  --purple-muted: oklch(0.96 0.02 285);
-  --purple-muted-foreground: oklch(0.55 0.06 285);
+  --purple-muted: oklch(0.950 0.03 282);
+  --purple-muted-foreground: oklch(0.44 0.07 282);
 
-  --purple-accent: oklch(0.92 0.08 295);
-  --purple-accent-foreground: oklch(0.3 0.12 295);
+  --purple-accent: oklch(0.88 0.10 292);
+  --purple-accent-foreground: oklch(0.28 0.12 292);
 
-  --purple-border: oklch(0.92 0.02 285);
-  --purple-input: oklch(0.92 0.02 285);
-  --purple-ring: oklch(0.6 0.18 280);
+  --purple-border: oklch(0.82 0.06 282);
+  --purple-input: oklch(0.82 0.06 282);
+  --purple-ring: oklch(0.52 0.22 278);
 
   /* Design Extras */
   --amber-glow: oklch(0.78 0.16 75);
-  --glow-primary: oklch(0.55 0.2 265 / 0.25);
+  --glow-primary: oklch(0.52 0.22 278 / 0.25);
   --glow-amber: oklch(0.78 0.16 75 / 0.2);
 
   /* Purple Design Extras */
   --purple-gradient: linear-gradient(
     135deg,
-    oklch(0.55 0.2 280),
-    oklch(0.65 0.18 290),
-    oklch(0.75 0.15 300)
+    oklch(0.48 0.24 276),
+    oklch(0.56 0.22 284),
+    oklch(0.64 0.18 294)
   );
-  --glow-purple: oklch(0.6 0.18 280 / 0.25);
+  --glow-purple: oklch(0.52 0.22 278 / 0.25);
+
+  /* Gold / Mustard Accent (complements amethyst) */
+  --gold-primary:    oklch(0.72 0.18 68);
+  --gold-light:      oklch(0.88 0.12 72);
+  --gold-muted:      oklch(0.94 0.06 72);
+  --gold-foreground: oklch(0.25 0.08 60);
+  --gold-border:     oklch(0.80 0.10 70);
+  --gold-gradient: linear-gradient(
+    135deg,
+    oklch(0.65 0.20 64),
+    oklch(0.78 0.18 74),
+    oklch(0.82 0.14 80)
+  );
+  --glow-gold: oklch(0.72 0.18 68 / 0.28);
 
   /* Student Theme (Indigo + Violet) */
   --student-background: #f8fafc;
@@ -545,19 +566,79 @@
       0 4px 12px rgba(0, 0, 0, 0.06);
   }
 
+  /* ── Gold Shadow Scale ──────────────────────────────── */
+  .shadow-gold-sm {
+    box-shadow: 0 2px 8px oklch(0.72 0.18 68 / 0.15);
+  }
+
+  .shadow-gold-md {
+    box-shadow: 0 6px 24px oklch(0.72 0.18 68 / 0.20);
+  }
+
+  .shadow-gold-lg {
+    box-shadow: 0 12px 40px oklch(0.72 0.18 68 / 0.25);
+  }
+
+  /* ── Gold Core Utilities ────────────────────────────── */
+  .bg-gold-gradient {
+    background: var(--gold-gradient);
+  }
+
+  .text-gold-primary {
+    color: var(--gold-primary);
+  }
+
+  .border-gold {
+    border-color: var(--gold-border);
+  }
+
+  /* ── Admin Typography Scale ─────────────────────────── */
+  .text-admin-label {
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .text-admin-caption {
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  .text-admin-body {
+    font-size: 13px;
+    font-weight: 400;
+  }
+
+  .text-admin-subhead {
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  .text-admin-title {
+    font-size: 20px;
+    font-weight: 800;
+    font-family: var(--font-jakarta);
+  }
+
+  .text-admin-hero {
+    font-size: 36px;
+    font-weight: 900;
+    font-family: var(--font-jakarta);
+  }
+
   /* ── Admin Canonical Primitives ─────────────────────── */
   .admin-shell {
     @apply p-7 lg:p-10 max-w-6xl mx-auto w-full;
   }
 
   .admin-card {
-    background: rgba(255, 255, 255, 0.97);
-    backdrop-filter: blur(12px);
+    background: oklch(1 0 0);
     border-radius: calc(var(--radius) * 2.4);
-    border: 1px solid oklch(0.92 0.02 285 / 0.5);
+    border: 1px solid oklch(0.86 0.05 282 / 0.65);
     box-shadow:
-      0 2px 8px oklch(0.6 0.18 280 / 0.06),
-      0 1px 3px rgba(0, 0, 0, 0.03);
+      0 1px 3px oklch(0.30 0.08 278 / 0.07),
+      0 4px 16px oklch(0.45 0.14 278 / 0.06);
   }
 
   .admin-card-hover {
@@ -568,8 +649,8 @@
 
   .admin-card-hover:hover {
     box-shadow:
-      0 8px 28px oklch(0.6 0.18 280 / 0.12),
-      0 2px 6px rgba(0, 0, 0, 0.05);
+      0 6px 24px oklch(0.45 0.18 278 / 0.12),
+      0 2px 6px oklch(0.30 0.08 278 / 0.08);
     transform: translateY(-2px);
   }
 
@@ -588,27 +669,33 @@
   }
 
   .admin-badge-school {
-    background: oklch(0.6 0.18 280 / 0.1);
-    color: oklch(0.6 0.18 280);
-    border-color: oklch(0.6 0.18 280 / 0.2);
+    background: oklch(0.90 0.08 280);
+    color: oklch(0.38 0.22 278);
+    border-color: oklch(0.78 0.12 278);
   }
 
   .admin-badge-stream {
-    background: oklch(0.55 0.15 265 / 0.1);
-    color: oklch(0.45 0.18 265);
-    border-color: oklch(0.55 0.15 265 / 0.25);
+    background: oklch(0.89 0.07 265);
+    color: oklch(0.34 0.20 265);
+    border-color: oklch(0.76 0.12 265);
   }
 
   .admin-badge-new {
-    background: oklch(0.5 0.15 145 / 0.1);
-    color: oklch(0.4 0.17 145);
-    border-color: oklch(0.5 0.15 145 / 0.25);
+    background: oklch(0.88 0.08 145);
+    color: oklch(0.30 0.16 145);
+    border-color: oklch(0.72 0.14 145);
   }
 
   .admin-badge-pending {
-    background: oklch(0.75 0.15 75 / 0.15);
-    color: oklch(0.55 0.18 65);
-    border-color: oklch(0.75 0.15 75 / 0.3);
+    background: oklch(0.90 0.10 75);
+    color: oklch(0.40 0.18 58);
+    border-color: oklch(0.78 0.14 70);
+  }
+
+  .admin-badge-gold {
+    background: oklch(0.94 0.06 72);
+    color: oklch(0.40 0.16 62);
+    border-color: oklch(0.80 0.10 70);
   }
 
   /* ── Shimmer animation ──────────────────────────────── */
@@ -657,16 +744,16 @@
 
   /* ── Table row styles ───────────────────────────────── */
   .admin-table-row {
-    border-bottom: 1px solid oklch(0.92 0.02 285 / 0.3);
+    border-bottom: 1px solid oklch(0.88 0.04 282 / 0.6);
     transition: background-color 0.15s ease;
   }
 
   .admin-table-row:nth-child(even) {
-    background-color: oklch(0.94 0.04 285 / 0.25);
+    background-color: oklch(0.958 0.018 282);
   }
 
   .admin-table-row:hover {
-    background-color: oklch(0.6 0.18 280 / 0.04);
+    background-color: oklch(0.92 0.06 280 / 0.35);
     cursor: pointer;
   }
 
@@ -699,23 +786,24 @@
   .admin-button-primary {
     background: var(--purple-gradient);
     color: oklch(0.98 0.01 280);
-    box-shadow: 0 2px 8px oklch(0.6 0.18 280 / 0.2);
+    box-shadow: 0 2px 8px oklch(0.52 0.22 278 / 0.25);
   }
 
   .admin-button-primary:hover {
-    box-shadow: 0 4px 16px oklch(0.6 0.18 280 / 0.3);
+    box-shadow: 0 4px 16px oklch(0.52 0.22 278 / 0.38);
     transform: translateY(-1px);
   }
 
   .admin-button-ghost {
     background: transparent;
     color: var(--purple-muted-foreground);
-    border: 1px solid oklch(0.92 0.02 285 / 0.4);
+    border: 1px solid oklch(0.82 0.06 282 / 0.55);
   }
 
   .admin-button-ghost:hover {
-    background: oklch(0.94 0.04 285 / 0.4);
+    background: oklch(0.935 0.055 282 / 0.5);
     color: var(--purple-foreground);
+    border-color: oklch(0.80 0.10 70 / 0.45);
   }
 
   /* Standardised form input — h-10, rounded-xl */
@@ -723,8 +811,8 @@
     height: 2.5rem;
     width: 100%;
     border-radius: 0.75rem;
-    border: 1px solid oklch(0.92 0.02 285 / 0.4);
-    background: oklch(0.94 0.04 285 / 0.2);
+    border: 1px solid oklch(0.82 0.06 282 / 0.55);
+    background: oklch(0.950 0.03 282 / 0.4);
     padding: 0 0.875rem;
     font-size: 0.8125rem;
     font-weight: 500;
@@ -734,13 +822,13 @@
   }
 
   .admin-input::placeholder {
-    color: oklch(0.55 0.06 285 / 0.45);
+    color: oklch(0.44 0.07 282 / 0.45);
   }
 
   .admin-input:focus {
-    border-color: oklch(0.6 0.18 280 / 0.5);
+    border-color: oklch(0.52 0.22 278 / 0.55);
     background: white;
-    box-shadow: 0 0 0 3px oklch(0.6 0.18 280 / 0.12);
+    box-shadow: 0 0 0 3px oklch(0.52 0.22 278 / 0.12);
   }
 
   /* Standardised empty state */
@@ -829,6 +917,224 @@
   .scrollbar-thin::-webkit-scrollbar-thumb {
     background: oklch(0.92 0.02 285);
     border-radius: 9999px;
+  }
+
+  /* ── Dark scrollbar (for ink sidebar) ────────────────── */
+  .scrollbar-dark {
+    scrollbar-width: thin;
+    scrollbar-color: oklch(0.88 0.04 282 / 0.5) transparent;
+  }
+
+  .scrollbar-dark::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .scrollbar-dark::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-dark::-webkit-scrollbar-thumb {
+    background: oklch(0.88 0.04 282 / 0.5);
+    border-radius: 9999px;
+  }
+
+  /* ── Ink Sidebar (dark chrome) ───────────────────────── */
+  .ink-sidebar {
+    background: oklch(1 0 0);
+    border-right: 1px solid oklch(0.88 0.04 282 / 0.6);
+  }
+
+  .ink-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.625rem;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: oklch(0.42 0.06 282);
+    transition: background-color 0.15s ease, color 0.15s ease;
+    cursor: pointer;
+    position: relative;
+    border-left: 3px solid transparent;
+  }
+
+  .ink-nav-item:hover {
+    background: oklch(0.94 0.04 282 / 0.65);
+    color: oklch(0.22 0.08 282);
+  }
+
+  .ink-nav-item-active {
+    background: oklch(0.91 0.08 280 / 0.6);
+    color: oklch(0.32 0.22 278);
+    font-weight: 600;
+    border-left-color: oklch(0.52 0.22 278);
+  }
+
+  .ink-nav-item-collapsed {
+    justify-content: center;
+    padding: 0.5rem;
+    border-left: none;
+    border-radius: 0.625rem;
+  }
+
+  .ink-nav-item-collapsed.ink-nav-item-active {
+    background: oklch(0.91 0.08 280 / 0.6);
+    box-shadow: 0 0 0 1px oklch(0.52 0.22 278 / 0.28);
+  }
+
+  .ink-section-label {
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: oklch(0.58 0.06 282 / 0.55);
+    padding: 0.625rem 0.75rem 0.25rem;
+  }
+
+  .ink-user-area {
+    border-top: 1px solid oklch(0.88 0.04 282 / 0.5);
+  }
+
+  .ink-user-card {
+    background: oklch(0.96 0.03 282 / 0.65);
+    border: 1px solid oklch(0.88 0.06 282 / 0.5);
+    border-radius: 0.625rem;
+    padding: 0.625rem;
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+  }
+
+  /* ── Skeleton loading ─────────────────────────────────── */
+  @keyframes skeleton-wave {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+
+  .skeleton {
+    background: linear-gradient(
+      90deg,
+      oklch(0.94 0.02 285) 25%,
+      oklch(0.97 0.01 285) 50%,
+      oklch(0.94 0.02 285) 75%
+    );
+    background-size: 200% 100%;
+    animation: skeleton-wave 1.6s ease-in-out infinite;
+    border-radius: 0.375rem;
+  }
+
+  /* ── Command palette ──────────────────────────────────── */
+  .cmd-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: oklch(0.10 0.03 270 / 0.55);
+    backdrop-filter: blur(6px);
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding-top: clamp(5rem, 12vh, 10rem);
+  }
+
+  .cmd-panel {
+    background: #ffffff;
+    border-radius: calc(var(--radius) * 2);
+    box-shadow:
+      0 24px 80px oklch(0.13 0.04 270 / 0.30),
+      0 4px 16px rgba(0,0,0,0.08);
+    width: 100%;
+    max-width: 32rem;
+    overflow: hidden;
+    border: 1px solid oklch(0.92 0.02 285 / 0.6);
+  }
+
+  .cmd-input-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.875rem 1.25rem;
+    border-bottom: 1px solid oklch(0.92 0.02 285 / 0.5);
+  }
+
+  .cmd-input {
+    flex: 1;
+    border: none;
+    outline: none;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    color: oklch(0.20 0.04 270);
+    background: transparent;
+  }
+
+  .cmd-input::placeholder {
+    color: oklch(0.65 0.04 270);
+  }
+
+  .cmd-result-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.625rem 1.25rem;
+    cursor: pointer;
+    transition: background-color 0.1s ease;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: oklch(0.28 0.04 270);
+  }
+
+  .cmd-result-item:hover,
+  .cmd-result-item[data-active='true'] {
+    background: oklch(0.91 0.08 280 / 0.45);
+    color: oklch(0.32 0.22 278);
+  }
+
+  .cmd-result-icon {
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 0.5rem;
+    background: oklch(0.94 0.04 285);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .cmd-result-item:hover .cmd-result-icon,
+  .cmd-result-item[data-active='true'] .cmd-result-icon {
+    background: oklch(0.52 0.22 278 / 0.12);
+  }
+
+  .cmd-footer {
+    padding: 0.5rem 1.25rem;
+    border-top: 1px solid oklch(0.92 0.02 285 / 0.5);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .cmd-hint {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.6875rem;
+    color: oklch(0.62 0.04 270);
+  }
+
+  .cmd-kbd {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.25rem;
+    height: 1.25rem;
+    padding: 0 0.25rem;
+    background: oklch(0.93 0.04 282);
+    border: 1px solid oklch(0.82 0.06 282);
+    border-radius: 0.25rem;
+    font-size: 0.625rem;
+    font-weight: 700;
+    color: oklch(0.44 0.07 282);
+    font-family: var(--font-mono);
   }
 
   /* ── Student Core Utilities (Indigo + Violet) ──────── */

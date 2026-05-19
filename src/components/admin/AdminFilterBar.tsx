@@ -97,7 +97,7 @@ export function AdminFilterBar({
 
       {/* Result count pill */}
       {resultCount !== undefined && totalCount !== undefined && (
-        <span className='text-[10px] font-bold text-purple-muted-foreground/60 uppercase tracking-[0.12em] shrink-0 bg-purple-secondary/40 px-3 py-1.5 rounded-full'>
+        <span className='admin-badge admin-badge-gold shrink-0 px-3 py-1.5'>
           {resultCount} of {totalCount}
         </span>
       )}

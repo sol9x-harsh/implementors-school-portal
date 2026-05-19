@@ -157,6 +157,21 @@ export default function StudentDirectoryClient({
     new Set(initialStudents.map((s) => s.stream).filter(Boolean) as string[]),
   );
 
+  /* Deterministic avatar color from name — 6 brand-harmonious colors */
+  function avatarColor(name: string): string {
+    const palette = [
+      'linear-gradient(135deg, oklch(0.55 0.22 278), oklch(0.68 0.20 285))',  // violet
+      'linear-gradient(135deg, oklch(0.50 0.20 265), oklch(0.62 0.18 272))',  // indigo
+      'linear-gradient(135deg, oklch(0.55 0.18 240), oklch(0.65 0.16 248))',  // sky
+      'linear-gradient(135deg, oklch(0.50 0.18 155), oklch(0.60 0.16 162))',  // emerald
+      'linear-gradient(135deg, oklch(0.62 0.18 70),  oklch(0.72 0.16 78))',   // amber
+      'linear-gradient(135deg, oklch(0.58 0.22 20),  oklch(0.68 0.20 28))',   // rose
+    ];
+    let hash = 0;
+    for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
+    return palette[Math.abs(hash) % palette.length];
+  }
+
   const columns: ColumnDef<Student>[] = useMemo(
     () => [
       {
@@ -172,7 +187,10 @@ export default function StudentDirectoryClient({
         ),
         cell: ({ row }: any) => (
           <div className='flex items-center gap-3'>
-            <div className='w-9 h-9 rounded-xl bg-purple-gradient flex items-center justify-center text-white text-[12px] font-black shrink-0 shadow-purple-xs'>
+            <div
+              className='w-9 h-9 rounded-xl flex items-center justify-center text-white text-[12px] font-black shrink-0 shadow-purple-xs'
+              style={{ background: avatarColor(row.original.name ?? '') }}
+            >
               {row.original.name?.charAt(0)?.toUpperCase() ?? '?'}
             </div>
             <div className='min-w-0'>
@@ -195,45 +213,32 @@ export default function StudentDirectoryClient({
         ),
       },
       {
-        accessorKey: 'studentType',
+        id: 'academic',
         header: () => (
           <span className='font-bold uppercase tracking-[0.12em] text-[10px] text-purple-muted-foreground/60'>
-            Division
+            Academic
           </span>
         ),
         cell: ({ row }: any) => {
-          return (
-            <span className='admin-badge admin-badge-school'>
-              <School className='w-2.5 h-2.5' />
-              SCHOOL
-            </span>
-          );
-        },
-      },
-      {
-        id: 'details',
-        header: () => (
-          <span className='font-bold uppercase tracking-[0.12em] text-[10px] text-purple-muted-foreground/60'>
-            Academic Context
-          </span>
-        ),
-        cell: ({ row }: any) => {
-          const top = row.original.classLevel;
-          const bottom = row.original.stream;
-          if (!top && !bottom)
+          const cls = row.original.classLevel;
+          const stream = row.original.stream;
+          if (!cls && !stream)
             return (
               <span className='text-[11px] text-purple-muted-foreground/40 italic'>
                 Not assigned
               </span>
             );
           return (
-            <div>
-              <p className='text-[12px] font-semibold text-purple-foreground'>
-                {top || '—'}
-              </p>
-              <p className='text-[10px] font-medium text-purple-muted-foreground/60 uppercase tracking-tight mt-0.5'>
-                {bottom || '—'}
-              </p>
+            <div className='flex items-center gap-1.5 flex-wrap'>
+              {cls && (
+                <span className='admin-badge admin-badge-school'>
+                  <GraduationCap className='w-2.5 h-2.5' />
+                  Class {cls}
+                </span>
+              )}
+              {stream && (
+                <span className='admin-badge admin-badge-stream'>{stream}</span>
+              )}
             </div>
           );
         },
@@ -263,9 +268,7 @@ export default function StudentDirectoryClient({
           </Button>
         ),
         cell: ({ row }: any) => {
-          const d = row.original.createdAt
-            ? new Date(row.original.createdAt)
-            : null;
+          const d = row.original.createdAt ? new Date(row.original.createdAt) : null;
           return (
             <div className='flex items-center gap-1.5 text-purple-muted-foreground/60 text-[11px] font-medium'>
               <Calendar className='w-3 h-3 shrink-0' />
@@ -283,23 +286,13 @@ export default function StudentDirectoryClient({
       {
         id: 'actions',
         cell: ({ row }: any) => (
-          <div className='flex items-center justify-end gap-1.5'>
-            <Button
-              variant='ghost'
-              size='sm'
-              className='h-7 px-3 text-[11px] font-bold text-purple-primary hover:bg-purple-primary hover:text-white gap-1 rounded-lg border border-purple-primary/25 hover:border-purple-primary transition-all duration-150'
-              onClick={(e: React.MouseEvent) => {
-                e.stopPropagation();
-                router.push(`/admin/students/${row.original.id}`);
-              }}
-            >
-              View <ChevronRight className='w-3 h-3' />
-            </Button>
+          <div className='flex items-center justify-end'>
+            <ChevronRight className='w-4 h-4 text-purple-border/50 group-hover:text-purple-primary transition-colors duration-150' />
           </div>
         ),
       },
     ],
-    [router],
+    [router, isMounted],
   );
 
   const table = useReactTable({
@@ -371,7 +364,7 @@ export default function StudentDirectoryClient({
                 setIsCreateOpen(true);
                 setCreatedPassword(null);
               }}
-              className='h-8 px-3.5 rounded-lg bg-purple-primary hover:bg-purple-primary/90 text-white text-[11px] font-bold gap-1.5 btn-shimmer shadow-purple-sm'
+              className='h-8 px-3.5 rounded-lg admin-button admin-button-primary text-[11px] font-bold gap-1.5 btn-shimmer'
             >
               <Plus className='w-3.5 h-3.5' /> Create Student
             </Button>
@@ -401,10 +394,10 @@ export default function StudentDirectoryClient({
             {table.getHeaderGroups().map((hg: any) => (
               <TableRow
                 key={hg.id}
-                className='hover:bg-transparent border-b border-purple-border/40 bg-purple-secondary/30'
+                className='hover:bg-transparent border-b border-purple-border/40 bg-purple-secondary/25'
               >
                 {hg.headers.map((header: any) => (
-                  <TableHead key={header.id} className='h-12 px-5 text-left'>
+                  <TableHead key={header.id} className='h-11 px-5 text-left'>
                     {header.isPlaceholder
                       ? null
                       : flexRender(
@@ -475,11 +468,16 @@ export default function StudentDirectoryClient({
         </Table>
 
         {/* Pagination */}
-        <div className='flex items-center justify-between px-5 py-3 border-t border-purple-border/25 bg-[oklch(0.975_0.006_285)]/60'>
+        <div className='flex items-center justify-between px-5 py-3 border-t border-purple-border/25 bg-purple-secondary/35 flex-wrap gap-2'>
           <p className='text-[11px] font-medium text-purple-muted-foreground/60 tabular-nums'>
-            {table.getFilteredRowModel().rows.length} students · Page{' '}
-            {table.getState().pagination.pageIndex + 1} of{' '}
-            {Math.max(1, table.getPageCount())}
+            {(() => {
+              const total = table.getFilteredRowModel().rows.length;
+              const pageSize = table.getState().pagination.pageSize;
+              const pageIdx = table.getState().pagination.pageIndex;
+              const from = total === 0 ? 0 : pageIdx * pageSize + 1;
+              const to = Math.min((pageIdx + 1) * pageSize, total);
+              return `Showing ${from}–${to} of ${total} student${total !== 1 ? 's' : ''}`;
+            })()}
           </p>
           <div className='flex items-center gap-1.5'>
             <Button
@@ -491,6 +489,9 @@ export default function StudentDirectoryClient({
             >
               <ChevronLeft className='w-3.5 h-3.5' />
             </Button>
+            <span className='text-[11px] font-semibold text-purple-muted-foreground/70 tabular-nums px-1'>
+              {table.getState().pagination.pageIndex + 1} / {Math.max(1, table.getPageCount())}
+            </span>
             <Button
               variant='outline'
               size='sm'
@@ -940,7 +941,7 @@ export default function StudentDirectoryClient({
                 <Button
                   type='submit'
                   disabled={isSubmitting}
-                  className='w-full h-11 rounded-lg bg-purple-gradient text-white font-black uppercase tracking-widest btn-shimmer shadow-purple-sm'
+                  className='w-full h-11 rounded-lg admin-button admin-button-primary font-black uppercase tracking-widest btn-shimmer'
                 >
                   {isSubmitting ? (
                     <>

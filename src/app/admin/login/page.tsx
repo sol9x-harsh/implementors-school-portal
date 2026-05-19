@@ -85,7 +85,7 @@ export default function AdminLoginPage() {
     <div className='admin-theme flex min-h-screen bg-[#fafafa]'>
       {/* ── Left Panel: Admin Branding ───────────────────────────── */}
       <div className='hidden lg:flex lg:w-[40%] relative overflow-hidden flex-col justify-between p-12 bg-purple-foreground text-white'>
-        <div className='absolute inset-0 bg-purple-gradient opacity-10' />
+        <div className='absolute inset-0 bg-gold-gradient opacity-10' />
 
         <div className='relative z-10'>
           <motion.div
@@ -94,8 +94,8 @@ export default function AdminLoginPage() {
             transition={{ duration: 0.6 }}
             className='flex items-center gap-3'
           >
-            <div className='w-10 h-10 rounded-xl bg-purple-primary flex items-center justify-center shadow-purple'>
-              <ShieldCheck className='w-6 h-6 text-white' />
+            <div className='w-10 h-10 rounded-xl bg-gold-gradient flex items-center justify-center shadow-gold-sm'>
+              <ShieldCheck className='w-6 h-6' style={{ color: 'oklch(0.20 0.06 55)' }} />
             </div>
             <span className='font-heading font-black text-xl uppercase tracking-widest'>
               Sol9x Console
@@ -128,8 +128,8 @@ export default function AdminLoginPage() {
                 transition={{ delay: 0.4 + i * 0.1 }}
                 className='flex gap-4 p-4 rounded-2xl bg-white/5 border border-white/10'
               >
-                <div className='w-10 h-10 rounded-xl bg-purple-primary/20 flex items-center justify-center shrink-0'>
-                  <f.icon className='w-5 h-5 text-purple-primary' />
+                <div className='w-10 h-10 rounded-xl bg-gold-gradient/20 flex items-center justify-center shrink-0'>
+                  <f.icon className='w-5 h-5' style={{ color: 'oklch(0.82 0.14 72)' }} />
                 </div>
                 <div>
                   <h3 className='text-sm font-black uppercase tracking-widest text-white'>
@@ -155,19 +155,20 @@ export default function AdminLoginPage() {
       </div>
 
       {/* ── Right Panel: Login Form ────────────────────────── */}
-      <div className='flex-1 flex flex-col justify-center items-center p-8 relative overflow-hidden'>
-        {/* Background blobs */}
-        <div className='absolute top-0 right-0 w-[500px] h-[500px] bg-purple-primary/5 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2' />
-        <div className='absolute bottom-0 left-0 w-[400px] h-[400px] bg-purple-secondary/10 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/2' />
-
+      <div
+        className='flex-1 flex flex-col justify-center items-center p-8 relative'
+        style={{
+          background: 'linear-gradient(160deg, oklch(0.96 0.03 282) 0%, oklch(0.97 0.04 75 / 0.4) 45%, oklch(0.99 0.005 270) 80%, #ffffff 100%)',
+        }}
+      >
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: mounted ? 1 : 0, y: mounted ? 0 : 24 }}
           transition={{ duration: 0.5 }}
           className='w-full max-w-md relative z-10'
         >
-          <div className='mb-10 text-center lg:text-left'>
-            <div className='inline-block px-3 py-1 rounded-full bg-purple-primary/10 text-purple-primary text-[10px] font-black uppercase tracking-widest mb-4'>
+          <div className='mb-8 text-center lg:text-left'>
+            <div className='inline-block px-3 py-1 rounded-full bg-gold-muted text-[10px] font-black uppercase tracking-widest mb-4' style={{ color: 'oklch(0.38 0.14 62)' }}>
               Restricted Access
             </div>
             <h2 className='text-4xl font-heading font-black text-purple-foreground tracking-tighter'>
@@ -178,7 +179,10 @@ export default function AdminLoginPage() {
             </p>
           </div>
 
-          <div className='bg-white rounded-5xl p-10 shadow-purple border border-purple-border/20'>
+          {/* Form card — tighter radius + top accent strip */}
+          <div className='bg-white rounded-3xl shadow-purple-md border border-purple-border/25 overflow-hidden'>
+            <div className='h-[3px] bg-gold-gradient' />
+            <div className='p-8'>
             <form onSubmit={handleSubmit} className='space-y-6'>
               <AnimatePresence>
                 {error && (
@@ -247,14 +251,16 @@ export default function AdminLoginPage() {
               <Button
                 type='submit'
                 disabled={loading}
-                className='w-full h-14 rounded-2xl bg-purple-gradient text-white font-heading font-black text-sm shadow-purple-lg hover:scale-[1.01] active:scale-95 transition-all mt-4 border-none'
+                className='w-full h-12 rounded-xl bg-gold-gradient font-heading font-black text-sm shadow-gold-lg hover:scale-[1.01] active:scale-95 transition-all mt-4 border-none btn-shimmer'
+              style={{ color: 'oklch(0.18 0.06 55)' }}
               >
                 {loading ? 'Authenticating...' : 'Establish Secure Session'}
               </Button>
             </form>
+            </div>
           </div>
 
-          <div className='mt-8 flex flex-col items-center gap-4'>
+          <div className='mt-6 flex flex-col items-center gap-4'>
             <button
               onClick={() => router.push('/login')}
               className='text-[11px] font-black text-purple-muted-foreground uppercase tracking-widest hover:text-purple-primary transition-colors'

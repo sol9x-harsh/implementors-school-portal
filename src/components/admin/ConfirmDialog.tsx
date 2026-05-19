@@ -65,7 +65,7 @@ export function ConfirmDialog({
               className={
                 destructive
                   ? 'h-9 rounded-xl bg-rose-500 hover:bg-rose-600 text-white font-bold text-sm shadow-sm'
-                  : 'h-9 rounded-xl bg-purple-primary hover:bg-purple-primary/90 text-white font-bold text-sm shadow-purple-sm'
+                  : 'h-9 rounded-xl admin-button admin-button-primary font-bold text-sm'
               }
             >
               {confirmLabel}

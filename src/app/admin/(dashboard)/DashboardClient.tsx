@@ -57,12 +57,12 @@ function getGreeting(): string {
 /* ── Quick actions ────────────────────────────────────── */
 const quickActions = [
   {
-    label: 'New Event',
+    label: 'New Activity',
     desc: 'Publish to feed',
     icon: CalendarPlus,
     href: '/admin/events',
     iconColor: 'text-purple-primary',
-    iconBg: 'bg-purple-primary/8 border-purple-border/30',
+    iconBg: 'bg-purple-secondary/40 border-purple-border/30',
   },
   {
     label: 'Data Request',
@@ -81,7 +81,7 @@ const quickActions = [
     iconBg: 'bg-purple-accent/40 border-purple-border/30',
   },
   {
-    label: 'New Test',
+    label: 'New Assessment',
     desc: 'Academic exams',
     icon: ClipboardList,
     href: '/admin/tests',
@@ -125,7 +125,7 @@ export default function AdminDashboard({
       delta: initialStats.studentDelta,
       up: initialStats.studentUp,
       icon: Users,
-      color: 'var(--purple-primary)',
+      accentColor: 'oklch(0.52 0.22 278)',
       iconBg: 'color-mix(in oklch, var(--purple-primary) 12%, transparent)',
       iconBorder: 'color-mix(in oklch, var(--purple-primary) 22%, transparent)',
     },
@@ -135,7 +135,7 @@ export default function AdminDashboard({
       delta: initialStats.eventDelta,
       up: initialStats.upcomingEvents > 0,
       icon: CalendarPlus,
-      color: 'var(--purple-primary)',
+      accentColor: 'oklch(0.52 0.22 278)',
       iconBg: 'color-mix(in oklch, var(--purple-primary) 12%, transparent)',
       iconBorder: 'color-mix(in oklch, var(--purple-primary) 22%, transparent)',
     },
@@ -145,7 +145,7 @@ export default function AdminDashboard({
       delta: initialStats.requestDelta,
       up: initialStats.activeRequests > 0 ? null : false,
       icon: FileText,
-      color: 'var(--purple-primary)',
+      accentColor: 'oklch(0.52 0.22 278)',
       iconBg: 'color-mix(in oklch, var(--purple-primary) 12%, transparent)',
       iconBorder: 'color-mix(in oklch, var(--purple-primary) 22%, transparent)',
     },
@@ -155,7 +155,7 @@ export default function AdminDashboard({
       delta: 'Available',
       up: null,
       icon: BarChart3,
-      color: 'var(--purple-primary)',
+      accentColor: 'oklch(0.52 0.22 278)',
       iconBg: 'color-mix(in oklch, var(--purple-primary) 12%, transparent)',
       iconBorder: 'color-mix(in oklch, var(--purple-primary) 22%, transparent)',
     },
@@ -178,9 +178,9 @@ export default function AdminDashboard({
         className='flex flex-col md:flex-row md:items-end justify-between gap-3 pb-5 border-b border-purple-border/40'
       >
         <div>
-          <p className='text-[10px] font-black uppercase tracking-[0.2em] text-purple-muted-foreground/50 mb-1 flex items-center gap-1.5'>
+          <p className='text-admin-label text-purple-muted-foreground/50 mb-1 flex items-center gap-1.5'>
             <Activity className='w-3 h-3' />
-            Overview
+            Admin Console
           </p>
           <h1 className='text-2xl font-heading font-black text-purple-foreground flex items-center gap-2 flex-wrap'>
             {getGreeting()},{' '}
@@ -189,7 +189,7 @@ export default function AdminDashboard({
             </span>{' '}
             👋
           </h1>
-          <p className='text-[12px] text-purple-muted-foreground font-semibold mt-1 flex items-center gap-1.5'>
+          <p className='text-admin-caption text-purple-muted-foreground mt-1 flex items-center gap-1.5'>
             <Sparkles className='w-3 h-3 text-purple-primary/60' />
             Here&apos;s what&apos;s happening at Sol9x today.
           </p>
@@ -213,62 +213,48 @@ export default function AdminDashboard({
             <motion.div
               key={s.label}
               variants={item}
-              className='relative overflow-hidden group cursor-default bg-white rounded-2xl border border-purple-border/30 shadow-purple-xs hover:shadow-purple-sm transition-all duration-200 hover:-translate-y-0.5'
+              className='relative overflow-hidden group cursor-default bg-white rounded-2xl border border-purple-border/25 shadow-purple-xs hover:shadow-purple-sm transition-all duration-200 hover:-translate-y-0.5'
             >
-              {/* Colored left accent bar */}
+              {/* Left accent stripe */}
               <div
-                className='absolute left-0 top-0 bottom-0 w-1 rounded-l-2xl'
-                style={{ background: s.color }}
+                className='absolute top-0 left-0 bottom-0 w-[3px] rounded-l-2xl'
+                style={{ background: s.accentColor }}
               />
 
-              {/* Top gradient strip */}
-              <div
-                className='absolute top-0 left-0 right-0 h-[2px] opacity-60'
-                style={{
-                  background: `linear-gradient(90deg, ${s.color}, transparent)`,
-                }}
-              />
-
-              <div className='p-5 pl-6'>
-                {/* Icon + delta row */}
+              <div className='pl-6 pr-5 pt-5 pb-5'>
+                {/* Label + Icon row */}
                 <div className='flex items-center justify-between mb-4'>
+                  <p className='text-[10px] font-black uppercase tracking-[0.14em] text-purple-muted-foreground/50'>
+                    {s.label}
+                  </p>
                   <div
-                    className='w-10 h-10 rounded-xl flex items-center justify-center border-[1.5px] shadow-purple-xs group-hover:scale-105 transition-transform duration-200'
+                    className='w-8 h-8 rounded-xl flex items-center justify-center border shrink-0 group-hover:scale-105 transition-transform duration-200'
                     style={{ background: s.iconBg, borderColor: s.iconBorder }}
                   >
-                    <Icon className='w-4.5 h-4.5' style={{ color: s.color }} />
-                  </div>
-
-                  <div
-                    className='flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold'
-                    style={{
-                      background:
-                        s.up === true
-                          ? 'oklch(0.50 0.15 145 / 0.10)'
-                          : 'oklch(0.94 0.04 285 / 0.7)',
-                      color:
-                        s.up === true
-                          ? 'oklch(0.38 0.17 145)'
-                          : 'oklch(0.50 0.06 285)',
-                    }}
-                  >
-                    {s.up === true && <TrendingUp className='w-2.5 h-2.5' />}
-                    {s.up === false && <TrendingDown className='w-2.5 h-2.5' />}
-                    <span>{s.delta}</span>
+                    <Icon className='w-3.5 h-3.5' style={{ color: s.accentColor }} />
                   </div>
                 </div>
 
-                {/* Value */}
-                <div
-                  className='text-4xl font-heading font-black leading-none tracking-tight'
-                  style={{ color: s.color }}
-                >
+                {/* Value — always dark for readability */}
+                <div className='text-[34px] font-heading font-black leading-none tracking-tight text-purple-foreground'>
                   {s.value}
                 </div>
 
-                {/* Label */}
-                <div className='text-[11px] font-bold text-purple-muted-foreground/60 uppercase tracking-[0.12em] mt-1.5'>
-                  {s.label}
+                {/* Delta pill */}
+                <div
+                  className='inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold mt-3'
+                  style={{
+                    background: s.up === true
+                      ? 'oklch(0.50 0.15 145 / 0.10)'
+                      : 'oklch(0.94 0.04 285 / 0.7)',
+                    color: s.up === true
+                      ? 'oklch(0.38 0.17 145)'
+                      : 'oklch(0.50 0.06 285)',
+                  }}
+                >
+                  {s.up === true && <TrendingUp className='w-2.5 h-2.5' />}
+                  {s.up === false && <TrendingDown className='w-2.5 h-2.5' />}
+                  <span>{s.delta}</span>
                 </div>
               </div>
             </motion.div>
@@ -282,7 +268,7 @@ export default function AdminDashboard({
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.18 }}
       >
-        <p className='text-[10px] font-bold uppercase tracking-[0.18em] text-purple-muted-foreground/45 mb-3'>
+        <p className='text-admin-label text-purple-muted-foreground/45 mb-3'>
           Quick Actions
         </p>
         <div className='grid grid-cols-2 md:grid-cols-4 gap-3'>
@@ -351,7 +337,7 @@ export default function AdminDashboard({
                     tick={{
                       fontSize: 11,
                       fontWeight: 600,
-                      fill: 'oklch(0.55 0.06 285)',
+                      fill: 'oklch(0.44 0.07 282)',
                     }}
                     dy={6}
                   />
@@ -361,7 +347,7 @@ export default function AdminDashboard({
                     tick={{
                       fontSize: 11,
                       fontWeight: 600,
-                      fill: 'oklch(0.55 0.06 285)',
+                      fill: 'oklch(0.44 0.07 282)',
                     }}
                   />
                   <Tooltip
@@ -461,7 +447,7 @@ export default function AdminDashboard({
         </motion.div>
       </div>
 
-      {/* ── Activity + System Status ─────────────────────── */}
+      {/* ── Activity + Action Required ──────────────────────── */}
       <div className='grid grid-cols-1 lg:grid-cols-3 gap-5 pb-6'>
         {/* Recent Activity */}
         <motion.div
@@ -479,27 +465,36 @@ export default function AdminDashboard({
             </button>
           </div>
           <div className='space-y-2'>
-            {initialActivity.slice(0, 5).map((act: any, idx: number) => (
-              <div
-                key={idx}
-                className='flex items-start gap-3 p-3 rounded-lg bg-purple-secondary/20 border border-purple-border/20 hover:border-purple-border/40 transition-colors duration-100'
-              >
-                <div className='w-1.5 h-1.5 rounded-full bg-purple-primary mt-1.5 shrink-0 pulse-dot' />
-                <div className='flex-1 min-w-0'>
-                  <p className='text-[12px] font-semibold text-purple-foreground truncate'>
-                    {act.title}
-                  </p>
-                  <p className='text-[11px] text-purple-muted-foreground font-semibold mt-0.5 truncate'>
-                    {act.desc}
-                  </p>
+            {initialActivity.slice(0, 5).map((act: any, idx: number) => {
+              const actIcons = [CalendarPlus, Users, ClipboardList, FileText, BarChart3];
+              const ActIcon = actIcons[idx % actIcons.length];
+              return (
+                <div
+                  key={idx}
+                  className='flex items-center gap-3 p-3 rounded-lg bg-purple-secondary/15 border border-purple-border/20 hover:bg-purple-secondary/30 hover:border-purple-border/35 transition-all duration-150'
+                >
+                  <div
+                    className='w-8 h-8 rounded-lg flex items-center justify-center shrink-0'
+                    style={{ background: 'color-mix(in oklch, var(--purple-primary) 12%, transparent)' }}
+                  >
+                    <ActIcon className='w-3.5 h-3.5 text-purple-primary' />
+                  </div>
+                  <div className='flex-1 min-w-0'>
+                    <p className='text-[12px] font-semibold text-purple-foreground truncate'>
+                      {act.title}
+                    </p>
+                    <p className='text-[11px] text-purple-muted-foreground font-medium mt-0.5 truncate'>
+                      {act.desc}
+                    </p>
+                  </div>
+                  {act.time && (
+                    <span className='text-[10px] font-medium text-purple-muted-foreground/45 shrink-0 tabular-nums'>
+                      {act.time}
+                    </span>
+                  )}
                 </div>
-                {act.time && (
-                  <span className='text-[10px] font-medium text-purple-muted-foreground/50 shrink-0 tabular-nums'>
-                    {act.time}
-                  </span>
-                )}
-              </div>
-            ))}
+              );
+            })}
             {initialActivity.length === 0 && (
               <div className='text-center py-10 text-purple-muted-foreground/40'>
                 <Sparkles className='w-7 h-7 mx-auto mb-2 opacity-25' />
@@ -511,66 +506,97 @@ export default function AdminDashboard({
           </div>
         </motion.div>
 
-        {/* System Status */}
+        {/* Action Required */}
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.42 }}
           className='admin-card p-5 flex flex-col'
         >
-          <h2 className='text-[14px] font-heading font-black text-purple-foreground mb-4'>
-            System Status
-          </h2>
-          <div className='space-y-1 flex-1'>
+          <div className='flex items-center gap-2 mb-4'>
+            <div
+              className='w-5 h-5 rounded-md flex items-center justify-center'
+              style={{ background: 'oklch(0.72 0.18 70 / 0.15)' }}
+            >
+              <Activity className='w-3 h-3' style={{ color: 'oklch(0.60 0.18 70)' }} />
+            </div>
+            <h2 className='text-[14px] font-heading font-black text-purple-foreground'>
+              Action Required
+            </h2>
+          </div>
+          <div className='space-y-2 flex-1'>
             {[
               {
-                label: 'Total Students',
-                value: initialStats.totalStudents,
-                icon: Users,
-                dot: 'bg-purple-primary',
-              },
-              {
-                label: 'Active Events',
-                value: initialStats.publishedEvents,
+                label: 'Upcoming Events',
+                value: initialStats.upcomingEvents,
+                href: '/admin/events',
+                urgent: initialStats.upcomingEvents > 0,
+                desc: initialStats.upcomingEvents > 0 ? 'Deadline approaching' : 'All clear',
                 icon: CalendarPlus,
-                dot: 'bg-violet-500',
+                dotColor: initialStats.upcomingEvents > 0 ? 'oklch(0.72 0.18 68)' : 'oklch(0.55 0.14 145)',
               },
               {
                 label: 'Open Requests',
                 value: initialStats.activeRequests,
+                href: '/admin/forms',
+                urgent: initialStats.activeRequests > 0,
+                desc: initialStats.activeRequests > 0 ? 'Needs response' : 'All handled',
                 icon: FileText,
-                dot: 'bg-indigo-500',
+                dotColor: initialStats.activeRequests > 0 ? 'oklch(0.72 0.18 68)' : 'oklch(0.55 0.14 145)',
               },
               {
-                label: 'Reports Ready',
-                value: '—',
+                label: 'Student Directory',
+                value: initialStats.totalStudents,
+                href: '/admin/students',
+                urgent: false,
+                desc: 'View all records',
+                icon: Users,
+                dotColor: 'oklch(0.60 0.18 280)',
+              },
+              {
+                label: 'Reports & Portfolios',
+                value: null,
+                href: '/admin/reports',
+                urgent: false,
+                desc: 'Generate reports',
                 icon: BarChart3,
-                dot: 'bg-fuchsia-500',
+                dotColor: 'oklch(0.60 0.18 280)',
               },
             ].map((s) => {
               const Icon = s.icon;
               return (
-                <div
-                  key={s.label}
-                  className='flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-purple-secondary/30 transition-colors duration-100'
-                >
-                  <div
-                    className={`w-1.5 h-1.5 rounded-full shrink-0 ${s.dot}`}
-                  />
-                  <Icon className='w-3.5 h-3.5 text-purple-muted-foreground/60 shrink-0' />
-                  <span className='text-[12px] font-medium text-purple-foreground flex-1'>
-                    {s.label}
-                  </span>
-                  <span className='text-[13px] font-black text-purple-foreground tabular-nums'>
-                    {s.value}
-                  </span>
-                </div>
+                <Link key={s.label} href={s.href}>
+                  <div className='flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-purple-secondary/30 transition-colors duration-100 group cursor-pointer'>
+                    <div
+                      className='w-1.5 h-1.5 rounded-full shrink-0 pulse-dot'
+                      style={{ background: s.dotColor }}
+                    />
+                    <Icon className='w-3.5 h-3.5 text-purple-muted-foreground/60 shrink-0' />
+                    <div className='flex-1 min-w-0'>
+                      <p className='text-[12px] font-semibold text-purple-foreground truncate leading-tight'>
+                        {s.label}
+                      </p>
+                      <p className='text-[10px] text-purple-muted-foreground/55 font-medium mt-0.5'>
+                        {s.desc}
+                      </p>
+                    </div>
+                    {s.value !== null && (
+                      <span
+                        className='text-[12px] font-black tabular-nums shrink-0'
+                        style={{ color: s.dotColor }}
+                      >
+                        {s.value}
+                      </span>
+                    )}
+                    <ArrowRight className='w-3 h-3 text-purple-border/50 group-hover:text-purple-primary group-hover:translate-x-0.5 transition-all duration-150 shrink-0' />
+                  </div>
+                </Link>
               );
             })}
           </div>
-          <div className='mt-4 pt-3 border-t border-purple-border/25'>
+          <div className='mt-3 pt-3 border-t border-purple-border/25'>
             <p className='text-[10px] text-purple-muted-foreground/40 font-medium uppercase tracking-widest'>
-              Updated · Just now
+              Live · Just now
             </p>
           </div>
         </motion.div>

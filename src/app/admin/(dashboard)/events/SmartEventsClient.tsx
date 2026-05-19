@@ -1,11 +1,20 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { AdminPageHeader } from '@/components/admin/AdminPageHeader';
+import { AdminFilterBar } from '@/components/admin/AdminFilterBar';
 import { ConfirmDialog } from '@/components/admin/ConfirmDialog';
 import { Label } from '@/components/ui/label';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import {
   Select,
   SelectContent,
@@ -25,6 +34,7 @@ import {
   Clock,
   Edit,
   Trash2,
+  X,
   ExternalLink as LinkIcon,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -119,10 +129,13 @@ export default function SmartEventsClient({
   initialEvents: EventItem[];
   schools: { _id: string; name: string }[];
 }) {
+  const formRef = useRef<HTMLFormElement>(null);
   const [events, setEvents] = useState<EventItem[]>(initialEvents);
+  const [searchQuery, setSearchQuery] = useState('');
   const [isPublishing, setIsPublishing] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   // ── Form state
   const [title, setTitle] = useState('');
@@ -138,9 +151,26 @@ export default function SmartEventsClient({
   const AudienceIcon = selectedAudience.icon;
   const typeConfig = LINK_TYPE_CONFIG[linkType];
 
+  const filteredEvents = useMemo(() => {
+    if (!searchQuery.trim()) return events;
+    const q = searchQuery.toLowerCase();
+    return events.filter(
+      (e) => e.title.toLowerCase().includes(q) || e.url?.toLowerCase().includes(q),
+    );
+  }, [events, searchQuery]);
+
   const getDisplayDate = () => {
     if (deadline) return `Deadline: ${fmt(deadline)}`;
     return null;
+  };
+
+  const openDrawer = () => setDrawerOpen(true);
+  const closeDrawer = () => {
+    setDrawerOpen(false);
+    setTimeout(() => {
+      setEditingId(null);
+      resetForm();
+    }, 300);
   };
 
   const handleEdit = (event: EventItem) => {
@@ -157,14 +187,11 @@ export default function SmartEventsClient({
       setAudience('cohort');
       setCohort(event.targetAudience[0]);
     }
-
-    // Scroll to form
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    setDrawerOpen(true);
   };
 
   const handleCancelEdit = () => {
-    setEditingId(null);
-    resetForm();
+    closeDrawer();
   };
 
   const resetForm = () => {
@@ -240,147 +267,303 @@ export default function SmartEventsClient({
   };
 
   return (
-    <div className='admin-shell space-y-10 pb-20'>
+    <div className='admin-shell space-y-5 pb-20'>
       <AdminPageHeader
         section='Engagement'
-        title='Activity Management'
-        subtitle='Post external links — tests, hackathons, activities, or events — directly to student Activity Hubs.'
+        title='Activities &amp; Events'
+        subtitle='Publish external links — assessments, hackathons, activities, and events — directly to student Activity Hubs.'
         icon={Sparkles}
+        actions={
+          <Button
+            onClick={openDrawer}
+            className='h-8 px-3.5 rounded-lg admin-button admin-button-primary text-[11px] font-bold gap-1.5 btn-shimmer'
+          >
+            <Send className='w-3.5 h-3.5' />
+            New Activity
+          </Button>
+        }
       />
 
-      <div className='flex flex-col gap-8'>
-        {/* ── FORM ─────────────────────────────────────────────────────── */}
-        <motion.form
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          onSubmit={handleSubmit}
-          className='space-y-5'
-        >
-          {/* ── UNIFIED PREMIUM FORM CARD ─────────────────────────────────────── */}
-          <div className='bg-white/95 backdrop-blur-sm rounded-[3rem] border border-purple-border/40 shadow-purple-lg p-8 lg:p-10 space-y-8'>
-            {/* Header */}
-            <div className='flex items-center gap-3 pb-5 border-b border-purple-border/30'>
-              <div className='w-10 h-10 rounded-2xl bg-purple-primary/10 flex items-center justify-center shrink-0'>
-                <Link2 className='w-5 h-5 text-purple-primary' aria-hidden='true' />
-              </div>
-              <div>
-                <h2 className='font-heading font-black text-purple-foreground leading-none'>
-                  {editingId ? 'Edit Activity' : 'Link Configuration'}
-                </h2>
-                <p className='text-[10px] text-purple-muted-foreground font-bold uppercase tracking-wider mt-1.5'>
-                  {editingId
-                    ? `Modifying ID: ${editingId}`
-                    : 'Define the external resource for students'}
-                </p>
-              </div>
-            </div>
+      {/* Filter Bar */}
+      <AdminFilterBar
+        searchValue={searchQuery}
+        onSearch={setSearchQuery}
+        searchPlaceholder='Search by title or URL...'
+        resultCount={filteredEvents.length}
+        totalCount={events.length}
+      />
 
-            {/* Row 1: Type selector (full width) */}
-            {!editingId && (
-              <div className='space-y-3'>
-                <Label className='text-[10px] font-black text-purple-foreground uppercase tracking-[0.2em] flex items-center gap-2 ml-1'>
-                  <Tag className='w-3.5 h-3.5 text-purple-primary' aria-hidden='true' />
-                  Resource Type <span className='text-rose-500'>*</span>
-                </Label>
-                <div className='grid grid-cols-2 sm:grid-cols-4 gap-2.5'>
-                  {(Object.keys(LINK_TYPE_CONFIG) as LinkType[]).map((t) => {
-                    const cfg = LINK_TYPE_CONFIG[t];
-                    const active = linkType === t;
-                    return (
-                      <button
-                        key={t}
-                        type='button'
-                        onClick={() => setLinkType(t)}
-                        className={`relative flex flex-col items-center gap-2 py-4 px-2 rounded-[20px] border-2 text-center transition-all duration-300
-                          ${active ? 'border-purple-primary bg-purple-primary/[0.07] shadow-purple-sm scale-[1.02]' : 'border-purple-border/25 bg-purple-secondary/20 hover:border-purple-primary/30'}`}
+      {/* ── MANAGEMENT TABLE ──────────────────────────────────────────── */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.08 }}
+        className='admin-card overflow-hidden'
+      >
+
+        <Table>
+          <TableHeader>
+            <TableRow className='hover:bg-transparent border-b border-purple-border/40 bg-purple-secondary/25'>
+              <TableHead className='h-11 px-5 text-[10px] font-black uppercase tracking-[0.13em] text-purple-muted-foreground/55 text-left'>
+                Activity
+              </TableHead>
+              <TableHead className='h-11 px-5 text-[10px] font-black uppercase tracking-[0.13em] text-purple-muted-foreground/55 text-left'>
+                Audience
+              </TableHead>
+              <TableHead className='h-11 px-5 text-[10px] font-black uppercase tracking-[0.13em] text-purple-muted-foreground/55 text-left'>
+                Deadline
+              </TableHead>
+              <TableHead className='h-11 px-5 text-[10px] font-black uppercase tracking-[0.13em] text-purple-muted-foreground/55 text-right'>
+                Actions
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            <AnimatePresence mode='popLayout'>
+              {filteredEvents.map((event, idx) => (
+                <motion.tr
+                  key={event.id}
+                  layout
+                  initial={{ opacity: 0, y: 4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.15 }}
+                  className={`border-b border-purple-border/15 hover:bg-purple-secondary/25 transition-colors duration-150 group ${idx % 2 === 1 ? 'bg-purple-background/45' : 'bg-white'}`}
+                >
+                  <TableCell className='py-3 px-5'>
+                    <div className='flex items-center gap-3 min-w-0'>
+                      <div className='w-9 h-9 rounded-xl bg-purple-primary/8 flex items-center justify-center group-hover:bg-purple-primary/12 transition-colors shrink-0 border border-purple-border/20'>
+                        <LinkIcon className='w-3.5 h-3.5 text-purple-primary/50' />
+                      </div>
+                      <div className='min-w-0 flex-1'>
+                        <p className='font-semibold text-purple-foreground text-[13px] leading-tight truncate'>
+                          {event.title}
+                        </p>
+                        <p className='text-[11px] text-purple-muted-foreground/60 font-medium truncate mt-0.5'>
+                          {event.url}
+                        </p>
+                      </div>
+                    </div>
+                  </TableCell>
+                  <TableCell className='py-3 px-5'>
+                    {event.targetAudience?.[0] === 'all' ? (
+                      <span className='admin-badge admin-badge-school'>
+                        <Globe className='w-3 h-3 shrink-0' />
+                        Global
+                      </span>
+                    ) : (
+                      <span className='admin-badge admin-badge-stream'>
+                        <GraduationCap className='w-3 h-3 shrink-0' />
+                        <span className='truncate max-w-[80px]'>{event.targetAudience?.[0]}</span>
+                      </span>
+                    )}
+                  </TableCell>
+                  <TableCell className='py-3 px-5'>
+                    <div className='flex items-center gap-1.5 text-purple-muted-foreground/75'>
+                      <Clock className='w-3 h-3 shrink-0' />
+                      <span className='text-[12px] font-medium'>
+                        {event.date ? fmt(event.date) : '—'}
+                      </span>
+                    </div>
+                  </TableCell>
+                  <TableCell className='py-3 px-5 text-right'>
+                    <div className='flex items-center justify-end gap-1'>
+                      <Button
+                        variant='ghost'
+                        size='icon'
+                        onClick={() => handleEdit(event)}
+                        className='w-8 h-8 rounded-lg hover:bg-purple-primary/10 hover:text-purple-primary transition-all'
                       >
-                        <span className='text-2xl'>{cfg.icon}</span>
-                        <span className={`text-[10px] font-black uppercase tracking-widest ${active ? 'text-purple-primary' : 'text-purple-foreground/70'}`}>
-                          {cfg.label}
-                        </span>
-                      </button>
-                    );
-                  })}
+                        <Edit className='w-3.5 h-3.5' />
+                      </Button>
+                      <Button
+                        variant='ghost'
+                        size='icon'
+                        onClick={() => handleDelete(event.id)}
+                        className='w-8 h-8 rounded-lg hover:bg-rose-50 hover:text-rose-500 transition-all text-rose-400/60'
+                      >
+                        <Trash2 className='w-3.5 h-3.5' />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </motion.tr>
+              ))}
+            </AnimatePresence>
+            {filteredEvents.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={4} className='h-[280px] text-center'>
+                  <div className='flex flex-col items-center gap-3'>
+                    <div className='w-14 h-14 rounded-2xl bg-purple-secondary/50 flex items-center justify-center'>
+                      <Sparkles className='w-6 h-6 text-purple-muted-foreground/35' />
+                    </div>
+                    <p className='text-[12px] font-bold uppercase tracking-widest text-purple-muted-foreground/45'>
+                      {searchQuery ? 'No activities match your search' : 'No activities published yet'}
+                    </p>
+                    {!searchQuery && (
+                      <Button
+                        onClick={openDrawer}
+                        className='mt-1 h-8 px-4 rounded-lg admin-button admin-button-primary text-[11px] font-bold gap-1.5'
+                      >
+                        <Send className='w-3 h-3' /> Post First Activity
+                      </Button>
+                    )}
+                  </div>
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </motion.div>
+
+      {/* ── SIDE DRAWER ─────────────────────────────────────────────── */}
+      {/* Backdrop */}
+      <AnimatePresence>
+        {drawerOpen && (
+          <motion.div
+            key='drawer-backdrop'
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className='fixed inset-0 z-40 bg-black/25 backdrop-blur-sm'
+            onClick={closeDrawer}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Drawer panel */}
+      <AnimatePresence>
+        {drawerOpen && (
+          <motion.div
+            key='drawer-panel'
+            initial={{ x: '100%' }}
+            animate={{ x: 0 }}
+            exit={{ x: '100%' }}
+            transition={{ type: 'spring', stiffness: 320, damping: 34 }}
+            className='fixed top-0 right-0 z-50 h-screen w-full max-w-[480px] bg-white border-l border-purple-border/40 shadow-purple-xl flex flex-col'
+          >
+            {/* Drawer header */}
+            <div className='flex items-center justify-between px-6 py-4 border-b border-purple-border/30 shrink-0'>
+              <div className='flex items-center gap-3'>
+                <div className='w-9 h-9 rounded-xl bg-purple-primary/10 flex items-center justify-center shrink-0'>
+                  <Link2 className='w-4.5 h-4.5 text-purple-primary' />
+                </div>
+                <div>
+                  <h2 className='font-heading font-black text-purple-foreground text-[15px] leading-none'>
+                    {editingId ? 'Edit Activity' : 'New Activity'}
+                  </h2>
+                  <p className='text-[9px] text-purple-muted-foreground font-bold uppercase tracking-wider mt-1'>
+                    {editingId ? 'Update link details' : 'Post a link to student feeds'}
+                  </p>
                 </div>
               </div>
-            )}
-
-            {/* Row 2: Title + URL (two columns) */}
-            <div className='grid grid-cols-1 md:grid-cols-2 gap-5'>
-              <div className='space-y-2.5'>
-                <Label htmlFor='title' className='text-[10px] font-black text-purple-foreground uppercase tracking-[0.2em] ml-1'>
-                  Display Title <span className='text-rose-500'>*</span>
-                </Label>
-                <Input
-                  id='title'
-                  name='title'
-                  placeholder='e.g. National Science Olympiad 2026'
-                  value={title}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTitle(e.target.value)}
-                  required
-                  className='h-12 rounded-2xl border-purple-border/40 bg-purple-secondary/20 focus:bg-white focus:border-purple-primary transition-all text-sm font-semibold placeholder:text-purple-muted-foreground/35'
-                />
-              </div>
-              <div className='space-y-2.5'>
-                <Label htmlFor='url' className='text-[10px] font-black text-purple-foreground uppercase tracking-[0.2em] ml-1'>
-                  Resource URL <span className='text-rose-500'>*</span>
-                </Label>
-                <Input
-                  id='url'
-                  name='url'
-                  type='url'
-                  placeholder='https://example.com/registration'
-                  value={url}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setUrl(e.target.value)}
-                  required
-                  className='h-12 rounded-2xl border-purple-border/40 bg-purple-secondary/20 focus:bg-white focus:border-purple-primary transition-all text-sm font-semibold placeholder:text-purple-muted-foreground/35'
-                />
-              </div>
+              <button
+                onClick={closeDrawer}
+                className='w-8 h-8 rounded-lg flex items-center justify-center text-purple-muted-foreground hover:bg-purple-secondary/40 transition-colors'
+              >
+                <X className='w-4 h-4' />
+              </button>
             </div>
 
-            {/* Row 3: Description + Deadline + Audience (three columns on lg) */}
-            <div className='grid grid-cols-1 md:grid-cols-3 gap-5'>
-              {/* Description */}
-              <div className='space-y-2.5'>
-                <Label htmlFor='description' className='text-[10px] font-black text-purple-foreground uppercase tracking-[0.2em] ml-1'>
-                  Description{' '}
-                  <span className='font-medium text-purple-muted-foreground normal-case tracking-normal'>(optional)</span>
-                </Label>
-                <textarea
-                  id='description'
-                  name='description'
-                  value={desc}
-                  onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setDesc(e.target.value)}
-                  placeholder='Registration requirements, eligibility, preparation tips…'
-                  className='w-full h-[114px] rounded-2xl border border-purple-border/40 bg-purple-secondary/20 focus:bg-white px-4 py-3 text-sm font-medium
-                    placeholder:text-purple-muted-foreground/35 outline-none focus:border-purple-primary transition-all resize-none font-sans'
-                />
-              </div>
+            {/* Drawer form — scrollable */}
+            <form ref={formRef} onSubmit={handleSubmit} className='flex-1 overflow-y-auto scrollbar-thin'>
+              <div className='p-6 space-y-5'>
 
-              {/* Deadline */}
-              <div className='space-y-2.5'>
-                <Label className='text-[10px] font-black text-purple-foreground uppercase tracking-[0.2em] flex items-center gap-2 ml-1'>
-                  <Calendar className='w-3.5 h-3.5 text-purple-primary' aria-hidden='true' />
-                  Submission Deadline <span className='text-rose-500'>*</span>
-                </Label>
-                <Input
-                  type='date'
-                  name='date'
-                  value={deadline}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDeadline(e.target.value)}
-                  required
-                  className='h-12 rounded-2xl border-purple-border/40 bg-purple-secondary/20 focus:bg-white focus:border-purple-primary transition-all text-sm font-semibold'
-                />
-              </div>
+                {/* Type selector */}
+                {!editingId && (
+                  <div className='space-y-2'>
+                    <Label className='text-[10px] font-black text-purple-foreground uppercase tracking-[0.2em] flex items-center gap-1.5'>
+                      <Tag className='w-3 h-3 text-purple-primary' />
+                      Resource Type <span className='text-rose-500'>*</span>
+                    </Label>
+                    <div className='grid grid-cols-2 gap-2'>
+                      {(Object.keys(LINK_TYPE_CONFIG) as LinkType[]).map((t) => {
+                        const cfg = LINK_TYPE_CONFIG[t];
+                        const active = linkType === t;
+                        return (
+                          <button
+                            key={t}
+                            type='button'
+                            onClick={() => setLinkType(t)}
+                            className={`flex items-center gap-2.5 py-3 px-4 rounded-xl border-2 transition-all duration-200
+                              ${active ? 'border-purple-primary/40 bg-purple-secondary/50 shadow-purple-xs' : 'border-purple-border/25 bg-purple-secondary/15 hover:border-purple-primary/30'}`}
+                          >
+                            <span className='text-lg leading-none'>{cfg.icon}</span>
+                            <span className={`text-[11px] font-black uppercase tracking-wide ${active ? 'text-purple-primary' : 'text-purple-foreground/70'}`}>
+                              {cfg.label}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
 
-              {/* Audience */}
-              <div className='space-y-2.5'>
-                <Label className='text-[10px] font-black text-purple-foreground uppercase tracking-[0.2em] flex items-center gap-2 ml-1'>
-                  <Users className='w-3.5 h-3.5 text-purple-primary' aria-hidden='true' />
-                  Target Audience <span className='text-rose-500'>*</span>
-                </Label>
+                {/* Title */}
                 <div className='space-y-2'>
+                  <Label className='text-[10px] font-black text-purple-foreground uppercase tracking-[0.2em]'>
+                    Display Title <span className='text-rose-500'>*</span>
+                  </Label>
+                  <Input
+                    placeholder='e.g. National Science Olympiad 2026'
+                    value={title}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTitle(e.target.value)}
+                    required
+                    className='h-10 rounded-xl border-purple-border/40 bg-purple-secondary/20 focus:bg-white focus:border-purple-primary transition-all text-sm font-semibold'
+                  />
+                </div>
+
+                {/* URL */}
+                <div className='space-y-2'>
+                  <Label className='text-[10px] font-black text-purple-foreground uppercase tracking-[0.2em]'>
+                    Resource URL <span className='text-rose-500'>*</span>
+                  </Label>
+                  <Input
+                    type='url'
+                    placeholder='https://example.com/registration'
+                    value={url}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setUrl(e.target.value)}
+                    required
+                    className='h-10 rounded-xl border-purple-border/40 bg-purple-secondary/20 focus:bg-white focus:border-purple-primary transition-all text-sm font-semibold'
+                  />
+                </div>
+
+                {/* Description */}
+                <div className='space-y-2'>
+                  <Label className='text-[10px] font-black text-purple-foreground uppercase tracking-[0.2em]'>
+                    Description <span className='font-medium text-purple-muted-foreground normal-case tracking-normal'>(optional)</span>
+                  </Label>
+                  <textarea
+                    value={desc}
+                    onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setDesc(e.target.value)}
+                    placeholder='Registration requirements, eligibility, preparation tips…'
+                    rows={3}
+                    className='w-full rounded-xl border border-purple-border/40 bg-purple-secondary/20 focus:bg-white px-3.5 py-2.5 text-sm font-medium
+                      placeholder:text-purple-muted-foreground/35 outline-none focus:border-purple-primary transition-all resize-none font-sans'
+                  />
+                </div>
+
+                {/* Deadline */}
+                <div className='space-y-2'>
+                  <Label className='text-[10px] font-black text-purple-foreground uppercase tracking-[0.2em] flex items-center gap-1.5'>
+                    <Calendar className='w-3 h-3 text-purple-primary' />
+                    Submission Deadline <span className='text-rose-500'>*</span>
+                  </Label>
+                  <Input
+                    type='date'
+                    value={deadline}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDeadline(e.target.value)}
+                    required
+                    className='h-10 rounded-xl border-purple-border/40 bg-purple-secondary/20 focus:bg-white focus:border-purple-primary transition-all text-sm font-semibold'
+                  />
+                </div>
+
+                {/* Audience */}
+                <div className='space-y-2'>
+                  <Label className='text-[10px] font-black text-purple-foreground uppercase tracking-[0.2em] flex items-center gap-1.5'>
+                    <Users className='w-3 h-3 text-purple-primary' />
+                    Target Audience <span className='text-rose-500'>*</span>
+                  </Label>
                   <div className='flex gap-1.5 p-1 bg-purple-secondary/30 rounded-xl'>
                     {audienceOptions.map((opt) => {
                       const isActive = audience === opt.value;
@@ -390,28 +573,22 @@ export default function SmartEventsClient({
                           key={opt.value}
                           type='button'
                           onClick={() => setAudience(opt.value)}
-                          className={`flex-1 py-2.5 px-3 rounded-lg flex items-center justify-center gap-2 transition-all duration-200
+                          className={`flex-1 py-2 px-3 rounded-lg flex items-center justify-center gap-1.5 transition-all duration-200 text-[11px] font-black uppercase tracking-wider
                             ${isActive ? 'bg-white shadow-purple-sm text-purple-primary' : 'text-purple-muted-foreground hover:text-purple-foreground'}`}
                         >
-                          <Icon className={`w-3.5 h-3.5 shrink-0 ${isActive ? 'text-purple-primary' : ''}`} aria-hidden='true' />
-                          <span className={`text-[11px] font-black uppercase tracking-wider truncate ${isActive ? 'text-purple-primary' : ''}`}>
-                            {opt.label}
-                          </span>
+                          <Icon className='w-3 h-3 shrink-0' />
+                          {opt.label}
                         </button>
                       );
                     })}
                   </div>
-
                   {audience === 'cohort' && (
-                    <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}>
+                    <motion.div initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }}>
                       <Select value={cohort} onValueChange={(v) => setCohort(v || '')}>
-                        <SelectTrigger className='h-10 w-full rounded-xl border-purple-border/40 bg-purple-secondary/20 focus:border-purple-primary transition-all text-sm font-semibold'>
+                        <SelectTrigger className='h-10 w-full rounded-xl border-purple-border/40 bg-purple-secondary/20 focus:border-purple-primary transition-all text-sm font-semibold mt-1.5'>
                           <SelectValue placeholder='Select cohort' />
                         </SelectTrigger>
-                        <SelectContent
-                          className='rounded-xl shadow-purple-lg border-purple-border/40'
-                          style={{ width: 'auto', minWidth: 'var(--anchor-width)' }}
-                        >
+                        <SelectContent className='rounded-xl shadow-purple-lg border-purple-border/40'>
                           {COHORT_OPTIONS.map((opt) => (
                             <SelectItem key={opt.value} value={opt.value} className='text-sm font-medium'>
                               {opt.label}
@@ -423,180 +600,42 @@ export default function SmartEventsClient({
                   )}
                 </div>
               </div>
-            </div>
+            </form>
 
-            {/* ── Submit ─────────────────────────────────────────────────── */}
-            <div className='pt-2 flex gap-3 border-t border-purple-border/20'>
-              {editingId && (
-                <Button
-                  type='button'
-                  variant='outline'
-                  onClick={handleCancelEdit}
-                  className='h-12 px-8 rounded-2xl border-purple-border/40 text-purple-foreground font-black'
-                >
-                  Cancel Edit
-                </Button>
-              )}
+            {/* Drawer footer — sticky */}
+            <div className='px-6 py-4 border-t border-purple-border/30 flex gap-2.5 shrink-0'>
               <Button
-                type='submit'
-                disabled={isPublishing || !title || !url || !deadline || (audience === 'cohort' && !cohort)}
-                className='flex-1 h-12 rounded-2xl bg-purple-gradient text-white font-heading font-black shadow-purple-lg hover:shadow-purple-xl hover:scale-[1.005] active:scale-[0.995] transition-all duration-200 disabled:opacity-60 border-none group btn-shimmer'
+                type='button'
+                variant='outline'
+                onClick={closeDrawer}
+                className='h-10 px-5 rounded-xl border-purple-border/40 text-purple-muted-foreground font-bold text-[12px]'
               >
-                <span className='flex items-center justify-center gap-2.5'>
-                  {isPublishing ? (
-                    <>
-                      <svg className='animate-spin w-4 h-4' viewBox='0 0 24 24' fill='none'>
-                        <circle className='opacity-25' cx='12' cy='12' r='10' stroke='currentColor' strokeWidth='4' />
-                        <path className='opacity-75' fill='currentColor' d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z' />
-                      </svg>
-                      Saving…
-                    </>
-                  ) : (
-                    <>
-                      <Send className='w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform' aria-hidden='true' />
-                      {editingId ? 'Update Activity' : 'Publish to Student Activity Hubs'}
-                    </>
-                  )}
-                </span>
+                Cancel
+              </Button>
+              <Button
+                onClick={() => formRef.current?.requestSubmit()}
+                disabled={isPublishing || !title || !url || !deadline || (audience === 'cohort' && !cohort)}
+                className='flex-1 h-10 rounded-xl admin-button admin-button-primary font-bold text-[13px] btn-shimmer border-none disabled:opacity-60'
+              >
+                {isPublishing ? (
+                  <span className='flex items-center gap-2'>
+                    <svg className='animate-spin w-3.5 h-3.5' viewBox='0 0 24 24' fill='none'>
+                      <circle className='opacity-25' cx='12' cy='12' r='10' stroke='currentColor' strokeWidth='4' />
+                      <path className='opacity-75' fill='currentColor' d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z' />
+                    </svg>
+                    Saving…
+                  </span>
+                ) : (
+                  <span className='flex items-center gap-2'>
+                    <Send className='w-3.5 h-3.5' />
+                    {editingId ? 'Update Activity' : 'Publish to Feeds'}
+                  </span>
+                )}
               </Button>
             </div>
-          </div>
-        </motion.form>
-
-        {/* ── MANAGEMENT TABLE ─────────────────────────────────────────── */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className='bg-white/95 backdrop-blur-sm rounded-[2.5rem] border border-purple-border/40 shadow-purple-lg p-10'
-        >
-          <div className='flex items-center justify-between mb-8 pb-4 border-b border-purple-border/30'>
-            <div className='flex items-center gap-3'>
-              <div className='w-10 h-10 rounded-2xl bg-purple-primary/10 flex items-center justify-center'>
-                <Sparkles className='w-5 h-5 text-purple-primary' />
-              </div>
-              <div>
-                <h2 className='font-heading font-black text-purple-foreground leading-none'>
-                  Manage Posted Activities
-                </h2>
-                <p className='text-[10px] text-purple-muted-foreground font-bold uppercase tracking-wider mt-1.5'>
-                  Total {events.length} activities published
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className='overflow-x-auto'>
-            <table className='w-full'>
-              <thead>
-                <tr className='text-left border-b border-purple-border/20'>
-                  <th className='pb-4 text-[10px] font-black text-purple-muted-foreground uppercase tracking-widest px-4 min-w-[200px]'>
-                    Activity
-                  </th>
-                  <th className='pb-4 text-[10px] font-black text-purple-muted-foreground uppercase tracking-widest px-4 min-w-[120px]'>
-                    Audience
-                  </th>
-                  <th className='pb-4 text-[10px] font-black text-purple-muted-foreground uppercase tracking-widest px-4 min-w-[100px]'>
-                    Deadline
-                  </th>
-                  <th className='pb-4 text-[10px] font-black text-purple-muted-foreground uppercase tracking-widest px-4 text-right min-w-[100px]'>
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className='divide-y divide-purple-border/10'>
-                <AnimatePresence mode='popLayout'>
-                  {events.map((event) => (
-                    <motion.tr
-                      key={event.id}
-                      layout
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      className='group hover:bg-purple-secondary/20 transition-colors'
-                    >
-                      <td className='py-5 px-4 min-w-[200px]'>
-                        <div className='flex items-center gap-3 min-w-0'>
-                          <div className='w-10 h-10 rounded-xl bg-purple-primary/5 flex items-center justify-center group-hover:bg-white transition-colors shrink-0'>
-                            <LinkIcon className='w-4 h-4 text-purple-primary/40' />
-                          </div>
-                          <div className='min-w-0 flex-1'>
-                            <p className='font-bold text-purple-foreground text-sm leading-tight wrap-break-word'>
-                              {event.title}
-                            </p>
-                            <p className='text-[10px] text-purple-muted-foreground font-medium truncate mt-1'>
-                              {event.url}
-                            </p>
-                          </div>
-                        </div>
-                      </td>
-                      <td className='py-5 px-4 min-w-[120px]'>
-                        <div className='flex items-center gap-2 min-w-0'>
-                          {event.targetAudience?.[0] === 'all' ? (
-                            <span className='admin-badge admin-badge-school'>
-                              <Globe className='w-3 h-3 shrink-0' aria-hidden='true' />
-                              Global
-                            </span>
-                          ) : (
-                            <span className='admin-badge admin-badge-stream'>
-                              <GraduationCap className='w-3 h-3 shrink-0' aria-hidden='true' />
-                              <span className='truncate max-w-[80px]'>
-                                {event.targetAudience?.[0]}
-                              </span>
-                            </span>
-                          )}
-                        </div>
-                      </td>
-                      <td className='py-5 px-4'>
-                        <div className='flex items-center gap-2 text-purple-muted-foreground'>
-                          <Clock className='w-3.5 h-3.5' />
-                          <span className='text-[11px] font-bold uppercase tracking-wider'>
-                            {event.date ? fmt(event.date) : 'No date'}
-                          </span>
-                        </div>
-                      </td>
-                      <td className='py-5 px-4 text-right min-w-[100px]'>
-                        <div className='flex items-center justify-end gap-2 shrink-0'>
-                          <Button
-                            variant='ghost'
-                            size='icon'
-                            onClick={() => handleEdit(event)}
-                            className='w-9 h-9 rounded-xl hover:bg-purple-primary hover:text-white transition-all'
-                          >
-                            <Edit className='w-4 h-4' />
-                          </Button>
-                          <Button
-                            variant='ghost'
-                            size='icon'
-                            onClick={() => handleDelete(event.id)}
-                            className='w-9 h-9 rounded-xl hover:bg-rose-500 hover:text-white transition-all text-rose-500'
-                          >
-                            <Trash2 className='w-4 h-4' />
-                          </Button>
-                        </div>
-                      </td>
-                    </motion.tr>
-                  ))}
-                </AnimatePresence>
-                {events.length === 0 && (
-                  <tr>
-                    <td colSpan={4} className='py-20 text-center'>
-                      <div className='flex flex-col items-center gap-3'>
-                        <div className='w-16 h-16 rounded-3xl bg-purple-secondary/40 flex items-center justify-center'>
-                          <Clock className='w-8 h-8 text-purple-muted-foreground/30' />
-                        </div>
-                        <p className='text-sm font-bold text-purple-muted-foreground uppercase tracking-widest'>
-                          No activities published yet
-                        </p>
-                      </div>
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </motion.div>
-      </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <ConfirmDialog
         open={pendingDeleteId !== null}
